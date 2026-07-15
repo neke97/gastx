@@ -26,6 +26,24 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 3): registrar y listar movimientos
+
+**Hecho:**
+- Acción `addTransaction` (server action) en `dashboard/actions.ts`: valida e inserta
+  en `transactions`; devuelve estado para feedback en vivo (`useActionState`).
+- `src/components/TransactionForm.tsx` (cliente): toggle Gasto/Ingreso, monto,
+  categoría (filtrada por tipo), descripción y fecha; limpia el form al guardar.
+- `dashboard/page.tsx`: carga categorías + últimos 30 movimientos y muestra el
+  formulario y la lista (con formato ₡ y fecha es-CR; ingresos en verde, gastos en rojo).
+- **Verificado:** `npm run build` OK.
+
+**Nota:** commits de aquí en adelante SIN co-autoría de Claude (pedido del usuario).
+
+**Siguiente paso (pieza pequeña):**
+- Totales del mes (ingresos, gastos, balance) en el dashboard. Luego editar/borrar movimiento.
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 2): autenticación
 
 **Hecho:**
