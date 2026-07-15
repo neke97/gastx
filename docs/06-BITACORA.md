@@ -26,6 +26,23 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 1): migración núcleo
+
+**Hecho:**
+- `supabase/migrations/0001_core.sql`: tablas `profiles`, `categories`, `transactions`
+  con RLS (cada usuario solo ve lo suyo), índices, categorías por defecto y trigger
+  `on_auth_user_created` (crea profile + categorías al registrarse un usuario).
+
+**Notas:**
+- `transactions` tiene solo columnas núcleo; `recurring_template_id` e
+  `installment_plan_id` se agregan por ALTER TABLE en fases 3 y 4.
+- Aún **no aplicada** en Supabase; se pega en el SQL Editor cuando el proyecto esté creado.
+
+**Siguiente paso (pieza pequeña):**
+- Aplicar la migración en Supabase, y luego armar el login (auth) con Supabase.
+
+---
+
 ## 2026-07-15 — Fase 0: scaffolding del proyecto
 
 **Hecho:**
