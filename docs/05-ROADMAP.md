@@ -19,7 +19,7 @@ futuras sin acordarlo.
 - [x] Migraciones: `profiles`, `categories`, `transactions` (`supabase/migrations/0001_core.sql`). *Falta aplicarla en Supabase.*
 - [x] Seed de categorías por defecto (trigger `on_auth_user_created`).
 - [~] CRUD de transacciones: **agregar** y **listar** listos; falta editar/borrar.
-- [ ] Dashboard básico: totales del mes y balance.
+- [x] Dashboard básico: totales del mes y balance.
 - [ ] Formato CRC y fechas `es-CR`.
 
 ## Fase 2 — Categorías, personas y división

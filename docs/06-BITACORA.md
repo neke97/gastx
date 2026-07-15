@@ -26,6 +26,19 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 4): resumen del mes
+
+**Hecho:**
+- Tarjeta de balance del mes actual en el dashboard: ingresos, gastos y balance,
+  calculados desde una consulta del rango del mes (`occurred_on` entre inicio de mes
+  y inicio del siguiente). Balance en verde/rojo según signo.
+- **Verificado:** `npm run build` OK.
+
+**Siguiente paso (pieza pequeña):**
+- Editar / borrar un movimiento (completar el CRUD de `transactions`).
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 3): registrar y listar movimientos
 
 **Hecho:**

@@ -23,21 +23,46 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: categories }, { data: transactions }] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, name, kind")
-      .eq("is_archived", false)
-      .order("name"),
-    supabase
-      .from("transactions")
-      .select("id, kind, amount, description, occurred_on, categories(name)")
-      .order("occurred_on", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(30),
-  ]);
+  // Rango del mes actual (formato YYYY-MM-DD para comparar con occurred_on).
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonthStart = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
+
+  const [{ data: categories }, { data: transactions }, { data: monthRows }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, kind")
+        .eq("is_archived", false)
+        .order("name"),
+      supabase
+        .from("transactions")
+        .select("id, kind, amount, description, occurred_on, categories(name)")
+        .order("occurred_on", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("transactions")
+        .select("kind, amount")
+        .gte("occurred_on", monthStart)
+        .lt("occurred_on", nextMonthStart),
+    ]);
 
   const txs = (transactions ?? []) as unknown as TxRow[];
+
+  const income = (monthRows ?? [])
+    .filter((r) => r.kind === "income")
+    .reduce((sum, r) => sum + Number(r.amount), 0);
+  const expense = (monthRows ?? [])
+    .filter((r) => r.kind === "expense")
+    .reduce((sum, r) => sum + Number(r.amount), 0);
+  const balance = income - expense;
+
+  const monthLabel = new Intl.DateTimeFormat("es-CR", {
+    month: "long",
+    year: "numeric",
+  }).format(now);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -54,6 +79,35 @@ export default async function DashboardPage() {
           </button>
         </form>
       </header>
+
+      <section className="rounded-2xl border border-black/10 bg-gradient-to-br from-emerald-500/10 to-transparent p-5 dark:border-white/10">
+        <p className="text-xs font-medium uppercase tracking-wide text-black/50 dark:text-white/50">
+          Balance de {monthLabel}
+        </p>
+        <p
+          className={`mt-1 text-3xl font-bold tracking-tight ${
+            balance >= 0
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-red-600 dark:text-red-400"
+          }`}
+        >
+          {formatMoney(balance)}
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div className="rounded-xl bg-black/[0.03] px-3 py-2 dark:bg-white/[0.04]">
+            <p className="text-black/50 dark:text-white/50">Ingresos</p>
+            <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+              {formatMoney(income)}
+            </p>
+          </div>
+          <div className="rounded-xl bg-black/[0.03] px-3 py-2 dark:bg-white/[0.04]">
+            <p className="text-black/50 dark:text-white/50">Gastos</p>
+            <p className="font-semibold text-red-600 dark:text-red-400">
+              {formatMoney(expense)}
+            </p>
+          </div>
+        </div>
+      </section>
 
       <TransactionForm categories={categories ?? []} />
 
