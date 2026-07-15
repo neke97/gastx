@@ -25,7 +25,7 @@ futuras sin acordarlo.
 **Fase 1 completa ✅**
 
 ## Fase 2 — Categorías, personas y división
-- [ ] Gestión de categorías (crear/editar/color/ícono/archivar).
+- [~] Gestión de categorías: crear (nombre/color/tipo), archivar/restaurar y borrar en `/dashboard/categories`. Falta editar y selector de ícono.
 - [ ] Tabla `people` + gestión de personas (etiquetas).
 - [ ] `transaction_splits`: dividir gasto por monto o porcentaje.
 - [ ] Validación de que la suma cuadre.

@@ -26,6 +26,25 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 2 (parte 1): gestión de categorías
+
+**Hecho:**
+- Página `/dashboard/categories`: lista agrupada por Gastos/Ingresos, con punto de color.
+- `CategoryForm` (cliente): crear categoría con toggle tipo, nombre y paleta de colores.
+- Acciones `addCategory`, `toggleArchiveCategory` (archivar/restaurar) y `deleteCategory`
+  (borra; los movimientos quedan sin categoría por el FK ON DELETE SET NULL).
+- Enlace "Categorías" en el header del dashboard.
+- Nota de routing: la ruta estática `/dashboard/categories` tiene prioridad sobre la
+  dinámica `/dashboard/[id]`, así que no chocan.
+- **Verificado:** `npm run build` OK.
+
+**Falta en categorías:** editar (nombre/color) y selector de ícono (hoy solo color).
+
+**Siguiente paso (pieza pequeña):**
+- Tabla `people` (migración 0002) + gestión de personas (etiquetas).
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 7): editar movimiento + mejoras de UX → Fase 1 COMPLETA
 
 **Hecho:**
