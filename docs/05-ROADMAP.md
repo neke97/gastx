@@ -3,12 +3,16 @@
 Construimos incremental. Cada fase deja algo usable. No adelantar features de fases
 futuras sin acordarlo.
 
-## Fase 0 — Documentación y setup ✅ (en curso)
+## Fase 0 — Documentación y setup ✅
 - [x] Definir visión, stack y decisiones.
 - [x] Crear documentación base en `docs/`.
-- [ ] Inicializar proyecto Next.js + Tailwind.
-- [ ] Crear proyecto Supabase y conectar variables de entorno.
-- [ ] Configurar PWA (manifest + service worker).
+- [x] Inicializar proyecto Next.js + Tailwind (Next 16, React 19, Tailwind v4).
+- [x] Cliente Supabase (`src/lib/supabase/`) + plantilla `.env.example`.
+- [x] Configurar PWA (manifest + service worker + ícono).
+- [x] Git inicializado + `.gitignore` (con `.env.local` protegido).
+- [ ] **Pendiente del usuario:** crear el proyecto en Supabase y pegar URL + key en `.env.local`.
+- [ ] (Opcional) Generar íconos PNG 192/512 y maskable con un favicon generator.
+- [ ] (Opcional) Crear repo en GitHub y conectar a Vercel.
 
 ## Fase 1 — Núcleo: gastos e ingresos
 - [ ] Auth (login/registro con Supabase).
@@ -54,5 +58,6 @@ futuras sin acordarlo.
 
 ---
 
-**Fase actual:** Fase 0. Siguiente paso sugerido: inicializar el proyecto Next.js +
-Tailwind y conectar Supabase.
+**Fase actual:** Fase 0 completada (scaffolding listo). Siguiente paso sugerido:
+crear el proyecto en Supabase, conectar `.env.local`, y arrancar la Fase 1 (auth +
+tablas `profiles`/`categories`/`transactions`).
