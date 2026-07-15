@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut, deleteTransaction } from "./actions";
@@ -147,6 +148,14 @@ export default async function DashboardPage() {
                     {t.kind === "income" ? "+" : "−"}
                     {formatMoney(t.amount)}
                   </span>
+                  <Link
+                    href={`/dashboard/${t.id}`}
+                    aria-label="Editar movimiento"
+                    title="Editar"
+                    className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-black/[0.06] hover:text-black/70 dark:text-white/30 dark:hover:bg-white/10 dark:hover:text-white/80"
+                  >
+                    ✎
+                  </Link>
                   <form action={deleteTransaction}>
                     <input type="hidden" name="id" value={t.id} />
                     <button

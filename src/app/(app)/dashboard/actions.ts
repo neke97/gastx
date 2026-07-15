@@ -53,6 +53,51 @@ export async function addTransaction(
   return { ok: true };
 }
 
+/** Actualiza un movimiento existente. */
+export async function updateTransaction(
+  _prev: TxFormState,
+  formData: FormData,
+): Promise<TxFormState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión expiró. Volvé a ingresar." };
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Falta el identificador del movimiento." };
+
+  const kind = String(formData.get("kind") ?? "expense");
+  const amount = Number(formData.get("amount"));
+  const categoryId = formData.get("category_id");
+  const description = String(formData.get("description") ?? "").trim();
+  const occurredOn = String(formData.get("occurred_on") ?? "").trim();
+
+  if (kind !== "expense" && kind !== "income") {
+    return { error: "Tipo inválido." };
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { error: "El monto debe ser mayor a 0." };
+  }
+
+  const { error } = await supabase
+    .from("transactions")
+    .update({
+      kind,
+      amount,
+      category_id: categoryId ? String(categoryId) : null,
+      description: description || null,
+      ...(occurredOn ? { occurred_on: occurredOn } : {}),
+    })
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
+
 /** Borra un movimiento propio. */
 export async function deleteTransaction(formData: FormData) {
   const id = String(formData.get("id") ?? "");

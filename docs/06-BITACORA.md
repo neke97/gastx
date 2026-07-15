@@ -26,6 +26,24 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 7): editar movimiento + mejoras de UX → Fase 1 COMPLETA
+
+**Hecho:**
+- Acción `updateTransaction` + página de edición `/dashboard/[id]` (carga el movimiento,
+  reusa el formulario y redirige al dashboard al guardar).
+- `TransactionForm` ahora sirve para crear y editar (prop `initial`); enlace ✎ por fila.
+- **Fix UX categorías:** el `<select>` tenía texto claro sobre fondo blanco en modo
+  oscuro (ilegible). Ahora fondo/texto explícitos: `bg-white text-black` /
+  `dark:bg-neutral-900 dark:text-white`.
+- **Fecha:** default a hoy, campo controlado + botones rápidos "Hoy" y "Ayer".
+- **Verificado:** `npm run build` OK (ruta `/dashboard/[id]` generada).
+
+**Estado:** Fase 1 COMPLETA (auth + CRUD de movimientos + resumen del mes + formato es-CR).
+
+**Siguiente (Fase 2):** gestión de categorías, personas (etiquetas) y división de gastos.
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 6): validación de config Supabase
 
 **Hecho:**
