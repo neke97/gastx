@@ -26,6 +26,23 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 6): validación de config Supabase
+
+**Hecho:**
+- El usuario pegó la URL con el prefijo "URL: " → error "Invalid supabaseUrl".
+  Corregido en `.env.local`.
+- Nuevo `src/lib/supabase/config.ts` (`getSupabaseConfig`): valida que las variables
+  existan y que la URL sea http/https válida, con mensajes claros en español.
+- `client.ts`, `server.ts` y `middleware.ts` ahora usan ese validador.
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio:** cambios en `.env.local` requieren reiniciar `npm run dev`.
+
+**Siguiente paso (pieza pequeña):**
+- Editar un movimiento (cierra el CRUD).
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 5): borrar movimiento
 
 **Hecho:**
