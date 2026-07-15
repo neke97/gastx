@@ -26,6 +26,26 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 2): autenticación
+
+**Hecho:**
+- `middleware.ts` + `src/lib/supabase/middleware.ts`: refresco de sesión en cada request.
+- `/login` (route group `(auth)`): pantalla email + contraseña con server actions
+  `signIn` / `signUp`; muestra errores y mensajes vía searchParams.
+- `/dashboard` (route group `(app)`): protegido (redirige a `/login` si no hay sesión),
+  muestra el email y botón "Salir" (`signOut`).
+- Botón "Ingresar" en la home hacia `/login`.
+- **Verificado:** `npm run build` OK (rutas `/login`, `/dashboard` dinámicas, middleware activo).
+
+**Notas:**
+- `signUp` puede requerir confirmar el correo según la config de Supabase (por defecto ON).
+- Falta probar en vivo: necesita `.env.local` con las credenciales y la migración 0001 aplicada.
+
+**Siguiente paso (pieza pequeña):**
+- Formulario para registrar un gasto/ingreso (insert en `transactions`) y listarlos.
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 1): migración núcleo
 
 **Hecho:**

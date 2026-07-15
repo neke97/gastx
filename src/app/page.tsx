@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
@@ -30,10 +32,12 @@ export default function Home() {
         ))}
       </ul>
 
-      <p className="text-xs text-black/40 dark:text-white/40">
-        Fase 0 — proyecto inicializado. Próximo: autenticación y registro de
-        movimientos.
-      </p>
+      <Link
+        href="/login"
+        className="rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-700"
+      >
+        Ingresar
+      </Link>
     </main>
   );
 }
