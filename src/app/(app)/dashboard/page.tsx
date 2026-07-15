@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "./actions";
+import { signOut, deleteTransaction } from "./actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { formatMoney, formatDate } from "@/lib/format";
 
@@ -136,16 +136,29 @@ export default async function DashboardPage() {
                     {formatDate(t.occurred_on)}
                   </p>
                 </div>
-                <span
-                  className={`shrink-0 text-sm font-semibold ${
-                    t.kind === "income"
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {t.kind === "income" ? "+" : "−"}
-                  {formatMoney(t.amount)}
-                </span>
+                <div className="flex shrink-0 items-center gap-3">
+                  <span
+                    className={`text-sm font-semibold ${
+                      t.kind === "income"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {t.kind === "income" ? "+" : "−"}
+                    {formatMoney(t.amount)}
+                  </span>
+                  <form action={deleteTransaction}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <button
+                      type="submit"
+                      aria-label="Borrar movimiento"
+                      title="Borrar"
+                      className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
+                    >
+                      ✕
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>

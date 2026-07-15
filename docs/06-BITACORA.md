@@ -26,6 +26,20 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 1 (parte 5): borrar movimiento
+
+**Hecho:**
+- Supabase conectado por el usuario (`.env.local` con credenciales; nueva cuenta con
+  otro correo por el límite de 2 proyectos gratis).
+- Acción `deleteTransaction` (server action) + botón ✕ por fila en la lista del dashboard.
+  Usa `<form action={...}>` directo en el server component (sin cliente).
+- **Verificado:** `npm run build` OK.
+
+**Siguiente paso (pieza pequeña):**
+- Editar un movimiento (cierra el CRUD de `transactions`). Considerar confirmación al borrar.
+
+---
+
 ## 2026-07-15 — Fase 1 (parte 4): resumen del mes
 
 **Hecho:**

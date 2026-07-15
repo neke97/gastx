@@ -52,3 +52,24 @@ export async function addTransaction(
   revalidatePath("/dashboard");
   return { ok: true };
 }
+
+/** Borra un movimiento propio. */
+export async function deleteTransaction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // RLS ya limita a lo propio; el filtro por user_id es defensa extra.
+  await supabase
+    .from("transactions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  revalidatePath("/dashboard");
+}

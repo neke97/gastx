@@ -18,7 +18,7 @@ futuras sin acordarlo.
 - [x] Auth (login/registro con Supabase): middleware de sesión, `/login`, `/dashboard` protegido, salir.
 - [x] Migraciones: `profiles`, `categories`, `transactions` (`supabase/migrations/0001_core.sql`). *Falta aplicarla en Supabase.*
 - [x] Seed de categorías por defecto (trigger `on_auth_user_created`).
-- [~] CRUD de transacciones: **agregar** y **listar** listos; falta editar/borrar.
+- [~] CRUD de transacciones: **agregar**, **listar** y **borrar** listos; falta editar.
 - [x] Dashboard básico: totales del mes y balance.
 - [ ] Formato CRC y fechas `es-CR`.
 
