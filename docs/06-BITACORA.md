@@ -26,6 +26,32 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 4: cuotas → Fase 4 COMPLETA
+
+**Hecho:**
+- Migración `supabase/migrations/0005_installments.sql`: `installment_plans`,
+  `installment_payments`, RLS, y columna `transactions.installment_plan_id`.
+  **Falta aplicarla en Supabase.**
+- Acciones (`installments/actions.ts`): `addPlan` (crea plan + genera cuotas 1..N,
+  la última ajusta redondeo para cuadrar el total), `payInstallment` (registra un gasto
+  y marca la cuota; completa el plan si no quedan pendientes), `unpayInstallment`
+  (borra el gasto y revierte), `deletePlan`.
+- `InstallmentForm` (cliente): nombre, total, # cuotas (con preview ≈ por cuota),
+  categoría, primera fecha y frecuencia.
+- Página `/dashboard/installments` (lista con barra de progreso pagado/total) y detalle
+  `/dashboard/installments/[id]` (falta pagar / total / próxima + cuotas con pagar/desmarcar).
+- Enlace "Cuotas" en el header; header ahora usa `flex-wrap` (mobile-first).
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0005_installments.sql` en Supabase.
+
+**Nota UX:** el header del dashboard ya tiene 4 enlaces + Salir; a futuro conviene una
+navegación inferior (bottom nav) o menú para móvil.
+
+**Siguiente fase:** Fase 5 (reportes y gráficos) — usar la skill `dataviz`.
+
+---
+
 ## 2026-07-16 — Fase 3: recurrentes → Fase 3 COMPLETA
 
 **Hecho:**

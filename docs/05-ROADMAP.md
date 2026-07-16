@@ -41,10 +41,12 @@ futuras sin acordarlo.
 **Fase 3 completa ✅**
 
 ## Fase 4 — Cuotas
-- [ ] `installment_plans` + `installment_payments`.
-- [ ] Crear plan y generar cuotas.
-- [ ] Vista de control (pagado/faltante/próxima).
-- [ ] Marcar cuota pagada → registrar transacción.
+- [x] `installment_plans` + `installment_payments` (migración 0005).
+- [x] Crear plan y generar cuotas (última ajusta redondeo).
+- [x] Vista de control en `/dashboard/installments/[id]` (pagado/faltante/próxima + barra).
+- [x] Marcar cuota pagada → registra gasto; desmarcar lo revierte.
+
+**Fase 4 completa ✅**
 
 ## Fase 5 — Reportes y gráficos
 - [ ] Distribución por categoría (dona).
