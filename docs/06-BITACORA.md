@@ -26,6 +26,24 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-15 — Fase 2 (parte 2): personas (etiquetas)
+
+**Hecho:**
+- Migración `supabase/migrations/0002_people.sql`: tabla `people` (user_id, name,
+  linked_user_id para el futuro) + RLS + índice. **Falta aplicarla en Supabase.**
+- Página `/dashboard/people`: form para agregar y lista con borrar (server actions
+  `addPerson` / `deletePerson`, sin componente cliente).
+- Enlace "Personas" en el header del dashboard.
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0002_people.sql` en el SQL Editor de Supabase.
+
+**Siguiente paso (pieza pequeña):**
+- Migración `0003`: `transaction_splits`. Luego dividir un gasto por monto/porcentaje
+  al registrarlo, validando que la suma cuadre.
+
+---
+
 ## 2026-07-15 — Fase 2 (parte 1): gestión de categorías
 
 **Hecho:**
