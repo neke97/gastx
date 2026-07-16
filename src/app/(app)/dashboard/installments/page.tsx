@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InstallmentForm } from "@/components/InstallmentForm";
 import { deletePlan } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney } from "@/lib/format";
 
 type Plan = {
@@ -94,14 +95,13 @@ export default async function InstallmentsPage() {
                     </Link>
                     <form action={deletePlan}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button
-                        type="submit"
+                      <SubmitButton
                         aria-label="Borrar plan"
                         title="Borrar"
                         className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
                       >
                         ✕
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">

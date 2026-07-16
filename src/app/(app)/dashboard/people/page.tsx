@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { addPerson, deletePerson } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type Person = { id: string; name: string };
 
@@ -46,12 +47,12 @@ export default async function PeoplePage() {
           placeholder="Nombre (ej. Ana, Roommate…)"
           className="flex-1 rounded-lg border border-black/15 bg-transparent px-3 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-white/15"
         />
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Agregando…"
           className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
         >
           Agregar
-        </button>
+        </SubmitButton>
       </form>
 
       {people.length === 0 ? (
@@ -73,14 +74,13 @@ export default async function PeoplePage() {
               </span>
               <form action={deletePerson}>
                 <input type="hidden" name="id" value={p.id} />
-                <button
-                  type="submit"
+                <SubmitButton
                   aria-label="Borrar persona"
                   title="Borrar"
                   className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
                 >
                   ✕
-                </button>
+                </SubmitButton>
               </form>
             </li>
           ))}

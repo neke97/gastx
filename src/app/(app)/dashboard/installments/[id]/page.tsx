@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { payInstallment, unpayInstallment } from "../actions";
+import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 
 type Plan = {
@@ -110,22 +111,22 @@ export default async function PlanDetailPage({
             {c.paid_on ? (
               <form action={unpayInstallment}>
                 <input type="hidden" name="payment_id" value={c.id} />
-                <button
-                  type="submit"
+                <SubmitButton
+                  pendingLabel="…"
                   className="rounded-lg border border-black/15 px-3 py-1.5 text-xs transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
                 >
                   Desmarcar
-                </button>
+                </SubmitButton>
               </form>
             ) : (
               <form action={payInstallment}>
                 <input type="hidden" name="payment_id" value={c.id} />
-                <button
-                  type="submit"
+                <SubmitButton
+                  pendingLabel="Pagando…"
                   className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700"
                 >
                   Pagar
-                </button>
+                </SubmitButton>
               </form>
             )}
           </li>

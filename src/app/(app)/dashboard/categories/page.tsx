@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryForm } from "@/components/CategoryForm";
 import { toggleArchiveCategory, deleteCategory } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type Category = {
   id: string;
@@ -39,24 +40,23 @@ function CategoryRow({ c }: { c: Category }) {
             name="archive"
             value={c.is_archived ? "false" : "true"}
           />
-          <button
-            type="submit"
+          <SubmitButton
             title={c.is_archived ? "Desarchivar" : "Archivar"}
+            pendingLabel="…"
             className="rounded-md px-2 py-1 text-xs text-black/50 transition-colors hover:bg-black/[0.06] dark:text-white/50 dark:hover:bg-white/10"
           >
             {c.is_archived ? "Restaurar" : "Archivar"}
-          </button>
+          </SubmitButton>
         </form>
         <form action={deleteCategory}>
           <input type="hidden" name="id" value={c.id} />
-          <button
-            type="submit"
+          <SubmitButton
             aria-label="Borrar categoría"
             title="Borrar"
             className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
           >
             ✕
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </li>

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { RecurringForm } from "@/components/RecurringForm";
 import { GeneratePendingButton } from "@/components/GeneratePendingButton";
 import { toggleActiveRecurring, deleteRecurring } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 
 type Template = {
@@ -110,13 +111,13 @@ export default async function RecurringPage() {
                       name="active"
                       value={t.is_active ? "false" : "true"}
                     />
-                    <button
-                      type="submit"
+                    <SubmitButton
                       title={t.is_active ? "Pausar" : "Activar"}
+                      pendingLabel="…"
                       className="rounded-md px-2 py-1 text-xs text-black/50 transition-colors hover:bg-black/[0.06] dark:text-white/50 dark:hover:bg-white/10"
                     >
                       {t.is_active ? "Pausar" : "Activar"}
-                    </button>
+                    </SubmitButton>
                   </form>
                   <Link
                     href={`/dashboard/recurring/${t.id}`}
@@ -128,14 +129,13 @@ export default async function RecurringPage() {
                   </Link>
                   <form action={deleteRecurring}>
                     <input type="hidden" name="id" value={t.id} />
-                    <button
-                      type="submit"
+                    <SubmitButton
                       aria-label="Borrar recurrente"
                       title="Borrar"
                       className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
                     >
                       ✕
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </li>

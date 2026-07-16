@@ -26,6 +26,22 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — UX: loader en acciones + cursor en botones
+
+**Hecho (feedback del usuario):**
+- Las acciones "planas" (borrar, pagar, archivar, pausar, agregar persona…) se sentían
+  "pegadas" mientras corría el server action. Nuevo `SubmitButton` (cliente, `useFormStatus`)
+  que se deshabilita, baja opacidad y muestra `pendingLabel` mientras procesa. Aplicado en
+  dashboard, categorías, personas, recurrentes y cuotas (lista + detalle "Pagar").
+- Cursor "manita" en botones: regla global en `globals.css` (`button:not(:disabled){cursor:pointer}`
+  + `not-allowed` en disabled), porque Tailwind v4 no lo pone por defecto.
+- **Verificado:** `npm run build` OK.
+
+**Nota:** los formularios que ya usaban `useActionState` (agregar movimiento/categoría/
+recurrente/plan, generar) ya tenían su estado de carga.
+
+---
+
 ## 2026-07-16 — Fase 5: reportes y gráficos
 
 **Hecho:**

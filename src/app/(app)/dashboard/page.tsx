@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut, deleteTransaction } from "./actions";
 import { TransactionForm } from "@/components/TransactionForm";
+import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 
 type TxRow = {
@@ -212,14 +213,13 @@ export default async function DashboardPage() {
                   </Link>
                   <form action={deleteTransaction}>
                     <input type="hidden" name="id" value={t.id} />
-                    <button
-                      type="submit"
+                    <SubmitButton
                       aria-label="Borrar movimiento"
                       title="Borrar"
                       className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-white/30 dark:hover:text-red-400"
                     >
                       ✕
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </li>
