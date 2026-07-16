@@ -26,6 +26,22 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 6 (parte 1): navegación móvil
+
+**Hecho:**
+- `BottomNav` (cliente, `usePathname`): barra inferior fija con 5 pestañas
+  (Inicio, Reportes, Recurrentes, Cuotas, Más), con estado activo y safe-area iOS.
+- `src/app/(app)/layout.tsx`: envuelve las páginas con la barra y `pb-20`.
+- Página `/dashboard/more`: Categorías, Personas y Cerrar sesión (movidos del header).
+- Header del dashboard simplificado (solo saludo + email).
+- `src/app/(app)/loading.tsx`: spinner al navegar entre pantallas.
+- **Verificado:** `npm run build` OK.
+
+**Pendiente Fase 6:** íconos PNG 192/512 para PWA, animaciones/estados vacíos,
+generación automática de recurrentes (Vercel Cron + service role, al desplegar).
+
+---
+
 ## 2026-07-16 — UX: loader en acciones + cursor en botones
 
 **Hecho (feedback del usuario):**

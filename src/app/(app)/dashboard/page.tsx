@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { signOut, deleteTransaction } from "./actions";
+import { deleteTransaction } from "./actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
@@ -79,50 +79,9 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Hola 👋</h1>
-          <p className="text-sm text-black/60 dark:text-white/60">
-            {user.email}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Link
-            href="/dashboard/reports"
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-          >
-            Reportes
-          </Link>
-          <Link
-            href="/dashboard/categories"
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-          >
-            Categorías
-          </Link>
-          <Link
-            href="/dashboard/people"
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-          >
-            Personas
-          </Link>
-          <Link
-            href="/dashboard/recurring"
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-          >
-            Recurrentes
-          </Link>
-          <Link
-            href="/dashboard/installments"
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-          >
-            Cuotas
-          </Link>
-          <form action={signOut}>
-            <button className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]">
-              Salir
-            </button>
-          </form>
-        </div>
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">Hola 👋</h1>
+        <p className="text-sm text-black/60 dark:text-white/60">{user.email}</p>
       </header>
 
       <section className="rounded-2xl border border-black/10 bg-gradient-to-br from-emerald-500/10 to-transparent p-5 dark:border-white/10">

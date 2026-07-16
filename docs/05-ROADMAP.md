@@ -57,9 +57,10 @@ futuras sin acordarlo.
 **Fase 5 base completa ✅** (pendiente menor: gráfico de tendencia en línea y filtros).
 
 ## Fase 6 — Pulido y PWA completa
-- [ ] Offline básico, íconos, instalación.
+- [~] Navegación móvil: barra inferior (bottom nav) + sección "Más"; loading entre pantallas.
+- [ ] Offline básico, íconos PNG, instalación (sw.js ya existe; falta generar PNG 192/512).
 - [ ] Mejoras de UX, animaciones, estados vacíos bonitos.
-- [ ] Generación automática de recurrentes (job programado).
+- [ ] Generación automática de recurrentes (Vercel Cron + service role) — hacer al desplegar.
 
 ## Fase 7 — Escalar a producto (futuro)
 - [ ] Grupos compartidos reales (`groups`, `group_members`).
