@@ -26,6 +26,33 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 2 (parte 3): división de gastos entre personas
+
+**Hecho:**
+- Migración `supabase/migrations/0003_splits.sql`: tabla `transaction_splits`
+  (transaction_id, person_id, split_mode, value, amount_resolved) + RLS por transacción
+  padre + índice. **Falta aplicarla en Supabase.**
+- `addTransaction` extendido: helper `buildSplitRows` valida personas del usuario,
+  que la suma cuadre (100% en modo %, o el total en modo monto, tolerancia ₡1),
+  ajusta redondeo en la última fila. Inserta la transacción, obtiene su id, inserta los
+  splits; si fallan, borra la transacción (evita datos a medias).
+- `TransactionForm` (solo al crear): sección "Dividir entre personas" con modo
+  monto/%, filas persona+valor, botones "+ Persona" y "Repartir igual", monto controlado,
+  indicador de "falta X" y bloqueo del submit hasta que cuadre. Enlace a agregar personas
+  si no hay.
+- Dashboard: pasa `people` al form y muestra "Dividido: Ana ₡… · Beto ₡…" por movimiento
+  (query embebe `transaction_splits(people(name))`).
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0003_splits.sql` en el SQL Editor de Supabase.
+
+**Pendiente Fase 2 (menor):** editar splits de un movimiento existente; editar categoría
+(nombre/color) e íconos.
+
+**Siguiente fase sugerida:** Fase 3 (recurrentes) o Fase 5 (reportes/gráficos).
+
+---
+
 ## 2026-07-15 — Fase 2 (parte 2): personas (etiquetas)
 
 **Hecho:**

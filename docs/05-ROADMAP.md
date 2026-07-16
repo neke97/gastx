@@ -27,8 +27,10 @@ futuras sin acordarlo.
 ## Fase 2 — Categorías, personas y división
 - [~] Gestión de categorías: crear (nombre/color/tipo), archivar/restaurar y borrar en `/dashboard/categories`. Falta editar y selector de ícono.
 - [x] Tabla `people` (migración 0002) + gestión de personas en `/dashboard/people`.
-- [ ] `transaction_splits`: dividir gasto por monto o porcentaje.
-- [ ] Validación de que la suma cuadre.
+- [x] `transaction_splits` (migración 0003): dividir por monto o porcentaje al crear.
+- [x] Validación de que la suma cuadre (cliente + servidor). *Falta: editar splits en un movimiento existente.*
+
+**Fase 2 casi completa** (pendiente menor: editar categoría/íconos y editar splits).
 
 ## Fase 3 — Recurrentes
 - [ ] `recurring_templates` + `recurring_amount_history`.

@@ -12,6 +12,10 @@ type TxRow = {
   description: string | null;
   occurred_on: string;
   categories: { name: string } | null;
+  transaction_splits: {
+    amount_resolved: number;
+    people: { name: string } | null;
+  }[];
 };
 
 export default async function DashboardPage() {
@@ -30,25 +34,32 @@ export default async function DashboardPage() {
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const nextMonthStart = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
 
-  const [{ data: categories }, { data: transactions }, { data: monthRows }] =
-    await Promise.all([
-      supabase
-        .from("categories")
-        .select("id, name, kind")
-        .eq("is_archived", false)
-        .order("name"),
-      supabase
-        .from("transactions")
-        .select("id, kind, amount, description, occurred_on, categories(name)")
-        .order("occurred_on", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(30),
-      supabase
-        .from("transactions")
-        .select("kind, amount")
-        .gte("occurred_on", monthStart)
-        .lt("occurred_on", nextMonthStart),
-    ]);
+  const [
+    { data: categories },
+    { data: people },
+    { data: transactions },
+    { data: monthRows },
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, name, kind")
+      .eq("is_archived", false)
+      .order("name"),
+    supabase.from("people").select("id, name").order("name"),
+    supabase
+      .from("transactions")
+      .select(
+        "id, kind, amount, description, occurred_on, categories(name), transaction_splits(amount_resolved, people(name))",
+      )
+      .order("occurred_on", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(30),
+    supabase
+      .from("transactions")
+      .select("kind, amount")
+      .gte("occurred_on", monthStart)
+      .lt("occurred_on", nextMonthStart),
+  ]);
 
   const txs = (transactions ?? []) as unknown as TxRow[];
 
@@ -124,7 +135,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <TransactionForm categories={categories ?? []} />
+      <TransactionForm categories={categories ?? []} people={people ?? []} />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
@@ -150,6 +161,17 @@ export default async function DashboardPage() {
                     {t.categories?.name ? `${t.categories.name} · ` : ""}
                     {formatDate(t.occurred_on)}
                   </p>
+                  {t.transaction_splits.length > 0 && (
+                    <p className="mt-0.5 truncate text-xs text-emerald-700/80 dark:text-emerald-400/80">
+                      Dividido:{" "}
+                      {t.transaction_splits
+                        .map(
+                          (s) =>
+                            `${s.people?.name ?? "?"} ${formatMoney(s.amount_resolved)}`,
+                        )
+                        .join(" · ")}
+                    </p>
+                  )}
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span
