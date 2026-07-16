@@ -49,10 +49,12 @@ futuras sin acordarlo.
 **Fase 4 completa ✅**
 
 ## Fase 5 — Reportes y gráficos
-- [ ] Distribución por categoría (dona).
-- [ ] Ingresos vs egresos por mes (barras).
-- [ ] Tendencias (línea) y % por categoría.
-- [ ] Filtros por fecha/categoría.
+- [x] Distribución por categoría (dona) en `/dashboard/reports` (con % en leyenda).
+- [x] Ingresos vs egresos por mes (barras, últimos 6 meses) + tabla de valores.
+- [x] % por categoría (en la leyenda de la dona). Tendencia en línea: pendiente.
+- [ ] Filtros por fecha/categoría (hoy: mes actual para la dona, últimos 6 meses para barras).
+
+**Fase 5 base completa ✅** (pendiente menor: gráfico de tendencia en línea y filtros).
 
 ## Fase 6 — Pulido y PWA completa
 - [ ] Offline básico, íconos, instalación.

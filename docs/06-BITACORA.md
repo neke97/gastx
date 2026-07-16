@@ -26,6 +26,28 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 5: reportes y gráficos
+
+**Hecho:**
+- Página `/dashboard/reports` con dos gráficos (SVG/CSS puro, sin dependencias):
+  - **Dona** de gastos del mes por categoría (usa el color de cada categoría; top 8 +
+    "Otros"); leyenda con monto y %.
+  - **Barras** ingresos vs gastos, últimos 6 meses, con tabla de valores (mes/ingresos/
+    gastos/balance).
+- Usé la skill `dataviz`: validé el par ingresos/gastos con el script →
+  **teal `#0d9488` / rosa `#e11d48`** pasa CVD en claro y oscuro (verde/rojo puro fallaba).
+  Cada gráfico trae leyenda + tabla (identidad no solo por color).
+- Enlace "Reportes" en el header.
+- **Verificado:** `npm run build` OK.
+
+**Pendiente Fase 5 (menor):** gráfico de tendencia en línea; filtros por fecha/categoría;
+tooltips interactivos (hoy hay `title` nativo + tabla de valores).
+
+**Siguiente fase:** Fase 6 (pulido + PWA: offline, estados vacíos, generación automática
+de recurrentes) o cerrar cabos (editar splits/categoría, navegación móvil).
+
+---
+
 ## 2026-07-16 — Fase 4: cuotas → Fase 4 COMPLETA
 
 **Hecho:**
