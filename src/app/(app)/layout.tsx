@@ -7,7 +7,7 @@ export default function AppLayout({
 }) {
   return (
     <>
-      <div className="flex w-full flex-1 flex-col pb-20">{children}</div>
+      <div className="fade-in flex w-full flex-1 flex-col pb-20">{children}</div>
       <BottomNav />
     </>
   );

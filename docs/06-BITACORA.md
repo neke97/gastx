@@ -26,6 +26,31 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 6 (parte 2): íconos PNG, animación y cron → Fase 6 COMPLETA
+
+**Hecho:**
+- Íconos PNG generados con `sharp` desde `public/icon.svg`: `public/icon-192.png`,
+  `icon-512.png`, `icon-maskable-512.png` (gradiente a sangre + ₡ más chico) y
+  `src/app/apple-icon.png` (180, convención de Next). Verificado visualmente (₡ OK).
+- `manifest.ts` ahora referencia los PNG (any + maskable) y deja el SVG como extra.
+- Animación `fade-in` en `globals.css` (respeta `prefers-reduced-motion`), aplicada al
+  contenedor del layout `(app)`.
+- **Generación automática de recurrentes:** `src/lib/supabase/admin.ts` (cliente service
+  role, solo servidor), `src/app/api/cron/generate-recurring/route.ts` (protegido con
+  `CRON_SECRET`, genera para todos los usuarios) y `vercel.json` (cron diario 06:00 UTC).
+  `.env.example` actualizado con `SUPABASE_SERVICE_ROLE_KEY` y `CRON_SECRET`.
+- **Verificado:** `npm run build` OK.
+
+**Al desplegar (Vercel):** setear `SUPABASE_SERVICE_ROLE_KEY` y `CRON_SECRET` en las env
+vars del proyecto; el cron corre solo. Localmente no corre (no hay cron); el botón
+"Generar pendientes" sigue disponible.
+
+**Fase 6 COMPLETA.** Núcleo del producto terminado (Fases 1–6).
+**Siguiente sugerido:** desplegar en GitHub + Vercel (PWA instalable), o Fase 7 (grupos
+reales, multi-moneda, licencias) y cabos menores (editar splits/categoría, tendencia).
+
+---
+
 ## 2026-07-16 — Fase 6 (parte 1): navegación móvil
 
 **Hecho:**

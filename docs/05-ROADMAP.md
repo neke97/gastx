@@ -57,10 +57,13 @@ futuras sin acordarlo.
 **Fase 5 base completa ✅** (pendiente menor: gráfico de tendencia en línea y filtros).
 
 ## Fase 6 — Pulido y PWA completa
-- [~] Navegación móvil: barra inferior (bottom nav) + sección "Más"; loading entre pantallas.
-- [ ] Offline básico, íconos PNG, instalación (sw.js ya existe; falta generar PNG 192/512).
-- [ ] Mejoras de UX, animaciones, estados vacíos bonitos.
-- [ ] Generación automática de recurrentes (Vercel Cron + service role) — hacer al desplegar.
+- [x] Navegación móvil: barra inferior (bottom nav) + sección "Más"; loading entre pantallas.
+- [x] Íconos PNG 192/512 + maskable (generados con sharp desde `icon.svg`) + `apple-icon.png`.
+- [x] Animación suave de entrada (`fade-in`, respeta reduce-motion). sw.js ya existía.
+- [x] Generación automática de recurrentes: `/api/cron/generate-recurring` + `vercel.json`
+      (cron diario 06:00 UTC) + cliente admin (service role). Se activa al desplegar.
+
+**Fase 6 completa ✅**
 
 ## Fase 7 — Escalar a producto (futuro)
 - [ ] Grupos compartidos reales (`groups`, `group_members`).

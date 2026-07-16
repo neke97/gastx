@@ -34,3 +34,23 @@ label:has(> input[type="checkbox"]),
 button:disabled {
   cursor: not-allowed;
 }
+
+/* Animación suave de entrada para el contenido de cada pantalla. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-in {
+  animation: fadeIn 0.25s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    animation: none;
+  }
+}
