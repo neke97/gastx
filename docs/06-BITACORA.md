@@ -26,6 +26,24 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Despliegue 🚀
+
+**Hecho:**
+- Rama local renombrada `master` → `main`.
+- Repo en GitHub: **https://github.com/neke97/gastx** (privado). Push OK.
+- Desplegado en **Vercel** (build OK en 33s; todas las rutas + cron + PWA presentes).
+- Env vars en Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`.
+
+**Pendientes/recordatorios del usuario:**
+- En Supabase → Authentication → URL Configuration: Site URL + Redirect URLs = URL de Vercel.
+- Confirmar migraciones 0001–0005 aplicadas en Supabase.
+- Instalar PWA en el celular; verificar Cron Jobs en Vercel.
+
+**Flujo de deploy futuro:** cada `git push` a `main` redespliega automático en Vercel.
+
+---
+
 ## 2026-07-16 — Fase 6 (parte 2): íconos PNG, animación y cron → Fase 6 COMPLETA
 
 **Hecho:**
