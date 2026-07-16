@@ -1,7 +1,9 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+// En Next.js 16 el "middleware" se llama Proxy y corre en runtime Node.js por
+// defecto (lo que permite usar @supabase/ssr sin problemas de Edge).
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 

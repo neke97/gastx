@@ -26,6 +26,22 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fix deploy: middleware → proxy (Next 16)
+
+**Problema:** Vercel falló con "Edge Function 'middleware' referencing unsupported
+modules: @src/lib/supabase/middleware.ts". El `middleware.ts` (nombre legacy) se
+bundleaba como Edge Function, y `@supabase/ssr` no es 100% Edge-safe en ese path.
+
+**Causa/solución (Next 16):** el middleware ahora se llama **Proxy** y corre en
+**runtime Node.js por defecto**. Se renombró el archivo raíz a `src/proxy.ts` (¡debe ir
+en `src/`, al mismo nivel que `app`, no en la raíz!) con función exportada `proxy`.
+Se eliminó `middleware.ts`. El helper `src/lib/supabase/middleware.ts` (updateSession)
+se mantiene igual. Build muestra "ƒ Proxy (Middleware)".
+
+**Aprendizaje:** con `src/app`, los archivos de convención de proxy van en `src/`.
+
+---
+
 ## 2026-07-16 — Despliegue 🚀
 
 **Hecho:**
