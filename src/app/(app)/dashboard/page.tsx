@@ -98,6 +98,12 @@ export default async function DashboardPage() {
           >
             Personas
           </Link>
+          <Link
+            href="/dashboard/recurring"
+            className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+          >
+            Recurrentes
+          </Link>
           <form action={signOut}>
             <button className="rounded-lg border border-black/15 px-3 py-2 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]">
               Salir

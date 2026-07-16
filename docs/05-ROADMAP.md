@@ -33,10 +33,12 @@ futuras sin acordarlo.
 **Fase 2 casi completa** (pendiente menor: editar categoría/íconos y editar splits).
 
 ## Fase 3 — Recurrentes
-- [ ] `recurring_templates` + `recurring_amount_history`.
-- [ ] CRUD de recurrentes (salario, pases de bus, mensualidad).
-- [ ] Editar precio conservando historial.
-- [ ] Generar transacciones desde recurrentes (manual: "generar pendientes").
+- [x] `recurring_templates` + `recurring_amount_history` (migración 0004).
+- [x] CRUD de recurrentes en `/dashboard/recurring` (crear/listar/editar/pausar/borrar).
+- [x] Editar precio conservando historial (`recurring_amount_history`, visible en edición).
+- [x] Generar transacciones desde recurrentes (botón "Generar pendientes", se pone al día).
+
+**Fase 3 completa ✅**
 
 ## Fase 4 — Cuotas
 - [ ] `installment_plans` + `installment_payments`.

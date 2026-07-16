@@ -26,6 +26,34 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-16 — Fase 3: recurrentes → Fase 3 COMPLETA
+
+**Hecho:**
+- Migración `supabase/migrations/0004_recurring.sql`: `recurring_templates`,
+  `recurring_amount_history`, RLS, y columna `transactions.recurring_template_id`
+  (trazabilidad). **Falta aplicarla en Supabase.**
+- Acciones (`recurring/actions.ts`): `addRecurring` (crea + primer historial de precio),
+  `updateRecurring` (si cambia el monto agrega historial desde hoy, luego redirige),
+  `toggleActiveRecurring`, `deleteRecurring`, `generatePending` (genera transacciones de
+  todas las activas cuya `next_run_on` ya llegó, avanzando periodo por periodo con
+  `addPeriod`; usa el monto actual de la plantilla).
+- `RecurringForm` (crear/editar): tipo, nombre, monto, categoría, frecuencia
+  (diario/semanal/mensual/anual), intervalo "cada N", próxima fecha.
+- `GeneratePendingButton` (cliente, useActionState) muestra cuántos se generaron.
+- Página `/dashboard/recurring` (lista + form + generar) y edición
+  `/dashboard/recurring/[id]` (con historial de precio visible).
+- Enlace "Recurrentes" en el header del dashboard.
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0004_recurring.sql` en el SQL Editor de Supabase.
+
+**Nota técnica:** la generación usa el monto actual de la plantilla (no el histórico por
+fecha); suficiente para MVP. Historial queda para referencia/reportes.
+
+**Siguiente fase sugerida:** Fase 4 (cuotas) o Fase 5 (reportes/gráficos).
+
+---
+
 ## 2026-07-16 — Fase 2 (parte 3): división de gastos entre personas
 
 **Hecho:**
