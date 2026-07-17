@@ -5,6 +5,37 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-17 — Navegación de grupos, chart de mayores gastos y suscripciones
+
+**Hecho:**
+- **Grupos en la barra inferior** (`BottomNav`): además de "Más", ahora hay un
+  ícono 👥 Grupos entre Cuotas y Más para acceso directo. Crear grupos sigue
+  disponible desde Más → Grupos.
+- **Mayores gastos del mes como gráfico** (`TopExpensesBars`): la sección de
+  reportes pasó de lista simple a barras horizontales (ícono + etiqueta + monto),
+  ancho proporcional al mayor gasto.
+- **Acceso por suscripción / código promocional** (migración `0013`):
+  - `profiles` gana `access_active`, `plan`, `activated_at`, `promo_code`.
+    Cuentas existentes quedan activas (`plan = 'legacy'`) para no bloquear al dueño.
+  - Tabla `promo_codes` (RLS activo sin políticas → solo accesible vía función).
+  - Función SECURITY DEFINER `redeem_promo_code(p_code)`: valida código activo con
+    usos disponibles, incrementa contador y activa el acceso del usuario.
+  - Código provisional sembrado: **`123456`** (usos ilimitados).
+  - Gate en `(app)/layout.tsx`: sin `access_active` → redirige a `/subscribe`.
+  - Página `/subscribe` (fuera del grupo `(app)`): tarjeta de plan (pagos
+    "próximamente", deshabilitado) + formulario de código promocional (`PromoCodeForm`).
+
+**Pendiente para el usuario:**
+- Aplicar `supabase/migrations/0013_subscriptions.sql` en Supabase (SQL Editor → Run).
+
+**Nota de seguridad (a futuro):**
+- La política `profiles_update_own` permite al usuario actualizar sus propias
+  columnas, incluyendo `access_active`. Aceptable para uso personal; al integrar
+  pagos reales conviene restringir la escritura de ese campo (trigger o columna
+  gestionada solo por función/servicio).
+
+---
+
 ## 2026-07-15 — Arranque del proyecto
 
 **Hecho:**

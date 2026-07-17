@@ -8,6 +8,7 @@ const TABS = [
   { href: "/dashboard/reports", label: "Reportes", icon: "📊" },
   { href: "/dashboard/recurring", label: "Recurrentes", icon: "🔁" },
   { href: "/dashboard/installments", label: "Cuotas", icon: "💳" },
+  { href: "/dashboard/groups", label: "Grupos", icon: "👥" },
   { href: "/dashboard/more", label: "Más", icon: "⚙️" },
 ];
 

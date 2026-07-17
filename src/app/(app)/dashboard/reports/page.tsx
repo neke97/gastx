@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryDonut, type DonutSlice } from "@/components/CategoryDonut";
 import { MonthlyBars, type MonthDatum } from "@/components/MonthlyBars";
 import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
+import { TopExpensesBars } from "@/components/TopExpensesBars";
 import { buildRateMap, toBase, canConvert } from "@/lib/currency";
 import { categoryIcon } from "@/lib/categoryIcons";
-import { formatMoney, formatDate } from "@/lib/format";
 
 const OTHER_COLOR = "#64748b";
 const TOP_EXPENSES = 8;
@@ -201,29 +201,7 @@ export default async function ReportsPage({
           <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
             Mayores gastos del mes
           </h2>
-          <ul className="flex flex-col divide-y divide-black/5 dark:divide-white/5">
-            {topExpenses.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-3 py-2">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base"
-                    style={{ backgroundColor: e.color + "22" }}
-                  >
-                    {e.icon}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm">{e.label}</span>
-                    <span className="block text-xs text-black/50 dark:text-white/50">
-                      {formatDate(e.date)}
-                    </span>
-                  </span>
-                </span>
-                <span className="shrink-0 text-sm font-semibold text-red-600 dark:text-red-400">
-                  {formatMoney(e.amount, base)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <TopExpensesBars items={topExpenses} currency={base} />
         </section>
       )}
 
