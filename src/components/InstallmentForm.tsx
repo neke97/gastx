@@ -41,6 +41,7 @@ export function InstallmentForm({
 }) {
   const [total, setTotal] = useState("");
   const [count, setCount] = useState("");
+  const [currency, setCurrency] = useState(baseCurrency);
   const [state, formAction, pending] = useActionState<PlanFormState, FormData>(
     addPlan,
     null,
@@ -52,8 +53,9 @@ export function InstallmentForm({
       formRef.current?.reset();
       setTotal("");
       setCount("");
+      setCurrency(baseCurrency);
     }
-  }, [state]);
+  }, [state, baseCurrency]);
 
   const totalNum = Number(total) || 0;
   const countNum = Number(count) || 0;
@@ -112,7 +114,12 @@ export function InstallmentForm({
       {currencies.length > 1 ? (
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">Moneda</span>
-          <select name="currency" defaultValue={baseCurrency} className={selectClasses}>
+          <select
+            name="currency"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className={selectClasses}
+          >
             {currencies.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -126,7 +133,7 @@ export function InstallmentForm({
 
       {perInstallment > 0 && (
         <p className="text-sm text-black/60 dark:text-white/60">
-          ≈ {formatMoney(perInstallment)} por cuota
+          ≈ {formatMoney(perInstallment, currency)} por cuota
         </p>
       )}
 

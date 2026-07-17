@@ -80,6 +80,14 @@ export function RecurringForm({
 
   const visibleCategories = categories.filter((c) => c.kind === kind);
 
+  // Preservar la moneda original al editar aunque ya no tenga tasa.
+  const effectiveCurrencies = [
+    ...new Set([
+      ...currencies,
+      ...(initial?.currency ? [initial.currency] : []),
+    ]),
+  ];
+
   return (
     <form
       ref={formRef}
@@ -135,7 +143,7 @@ export function RecurringForm({
             className={inputClasses}
           />
         </label>
-        {currencies.length > 1 ? (
+        {effectiveCurrencies.length > 1 ? (
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Moneda</span>
             <select
@@ -143,7 +151,7 @@ export function RecurringForm({
               defaultValue={initial?.currency ?? baseCurrency}
               className={selectClasses}
             >
-              {currencies.map((c) => (
+              {effectiveCurrencies.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -151,7 +159,11 @@ export function RecurringForm({
             </select>
           </label>
         ) : (
-          <input type="hidden" name="currency" value={baseCurrency} />
+          <input
+            type="hidden"
+            name="currency"
+            value={initial?.currency ?? baseCurrency}
+          />
         )}
       </div>
 

@@ -127,6 +127,14 @@ export function TransactionForm({
   const visibleCategories = categories.filter((c) => c.kind === kind);
   const amountNum = Number(amount) || 0;
 
+  // Al editar, preservar la moneda original aunque ya no tenga tasa configurada.
+  const effectiveCurrencies = [
+    ...new Set([
+      ...currencies,
+      ...(initial?.currency ? [initial.currency] : []),
+    ]),
+  ];
+
   // Fecha+hora como instante ISO (si hay hora). Vacío = solo fecha.
   const occurredAtIso = (() => {
     if (!time || !date) return "";
@@ -212,7 +220,7 @@ export function TransactionForm({
             className={inputClasses}
           />
         </label>
-        {currencies.length > 1 ? (
+        {effectiveCurrencies.length > 1 ? (
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Moneda</span>
             <select
@@ -220,7 +228,7 @@ export function TransactionForm({
               defaultValue={initial?.currency ?? baseCurrency}
               className={selectClasses}
             >
-              {currencies.map((c) => (
+              {effectiveCurrencies.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -228,7 +236,11 @@ export function TransactionForm({
             </select>
           </label>
         ) : (
-          <input type="hidden" name="currency" value={baseCurrency} />
+          <input
+            type="hidden"
+            name="currency"
+            value={initial?.currency ?? baseCurrency}
+          />
         )}
       </div>
 

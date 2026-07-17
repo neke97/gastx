@@ -631,12 +631,17 @@ moneda sin tasa. Tasas por-día/históricas = mejora futura.
 3. ✅ RESUELTO **Conversión 1:1 silenciosa**: nuevo `canConvert`; dashboard y reportes
    solo suman/grafican montos convertibles; el dashboard muestra un aviso ámbar listando
    las monedas sin tipo de cambio (con enlace a Ajustes). Ya no se cuenta 1:1.
-4. **RLS insert transactions sin check de grupo** (`0007_group_expenses.sql`): agregar
-   `with check (group_id is null or public.is_group_member(group_id))` (migración nueva).
-5. **Editar sin tasas pisa la moneda** (`TransactionForm.tsx`): hidden input fuerza base y
-   sobreescribe la moneda original. Fix: preservar `initial.currency` aunque no haya tasa.
-6. **Preview de cuota siempre en CRC** (`InstallmentForm.tsx`): el "≈ X por cuota" ignora
-   la moneda elegida. Fix: formatear con la moneda seleccionada (estado controlado).
+4. ✅ RESUELTO **RLS insert transactions sin check de grupo**: migración
+   `0012_tx_group_insert_check.sql` recrea `transactions_all_own` con
+   `with check (user_id = auth.uid() and (group_id is null or is_group_member(group_id)))`.
+5. ✅ RESUELTO **Editar sin tasas pisa la moneda**: `TransactionForm` y `RecurringForm`
+   usan `effectiveCurrencies` (incluye `initial.currency` aunque no tenga tasa) y el hidden
+   preserva `initial.currency ?? base`.
+6. ✅ RESUELTO **Preview de cuota siempre en CRC**: `InstallmentForm` tiene la moneda como
+   estado controlado y el preview usa esa moneda.
+
+**TODOS los hallazgos del code-review (1–6) resueltos.**
+**Recordatorio al usuario:** aplicar `0012_tx_group_insert_check.sql` en Supabase.
 
 <!-- Plantilla para nuevas entradas:
 
