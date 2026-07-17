@@ -32,6 +32,14 @@ export function toBase(
   return r ? amount * r : amount;
 }
 
+/**
+ * ¿Se puede convertir esta moneda a la base? (es la base, o tiene tasa).
+ * Sirve para NO sumar 1:1 montos sin tipo de cambio (eso descuadra los totales).
+ */
+export function canConvert(currency: string, base: string, rates: RateMap): boolean {
+  return !currency || currency === base || rates[currency] != null;
+}
+
 /** Construye el mapa de tasas desde las filas de exchange_rates. */
 export function buildRateMap(
   rows: { code: string; rate_to_base: number }[] | null | undefined,

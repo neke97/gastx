@@ -96,10 +96,18 @@ export default async function GroupDetailPage({
       );
     }
   }
-  const balances = memberList.map((m) => ({
-    userId: m.user_id,
-    name: nameById.get(m.user_id) ?? "Miembro",
-    net: Math.round(((paid.get(m.user_id) ?? 0) - (owed.get(m.user_id) ?? 0)) * 100) / 100,
+  // Incluir a TODOS los que participaron (pagaron o les tocó parte), no solo a
+  // los miembros actuales: si alguien salió, sus montos deben seguir contando
+  // para que los saldos cuadren en cero.
+  const participantIds = new Set<string>([
+    ...memberList.map((m) => m.user_id),
+    ...paid.keys(),
+    ...owed.keys(),
+  ]);
+  const balances = [...participantIds].map((uid) => ({
+    userId: uid,
+    name: nameById.get(uid) ?? "Ex-miembro",
+    net: Math.round(((paid.get(uid) ?? 0) - (owed.get(uid) ?? 0)) * 100) / 100,
   }));
   const hasExpenses = expenseList.length > 0;
 

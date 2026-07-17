@@ -6,7 +6,12 @@ import { quickAddFromTemplate } from "./recurring/actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
-import { buildRateMap, toBase, availableCurrencies } from "@/lib/currency";
+import {
+  buildRateMap,
+  toBase,
+  availableCurrencies,
+  canConvert,
+} from "@/lib/currency";
 import { categoryIcon } from "@/lib/categoryIcons";
 
 type Shortcut = {
@@ -93,13 +98,26 @@ export default async function DashboardPage() {
   const rateMap = buildRateMap(rates);
   const currencies = availableCurrencies(base, rateMap);
 
-  const income = (monthRows ?? [])
+  // Solo sumamos lo convertible; lo que no tenga tasa se avisa aparte (no se
+  // cuenta como 1:1, que descuadraría el total).
+  const convertible = (monthRows ?? []).filter((r) =>
+    canConvert(r.currency, base, rateMap),
+  );
+  const income = convertible
     .filter((r) => r.kind === "income")
     .reduce((sum, r) => sum + toBase(Number(r.amount), r.currency, base, rateMap), 0);
-  const expense = (monthRows ?? [])
+  const expense = convertible
     .filter((r) => r.kind === "expense")
     .reduce((sum, r) => sum + toBase(Number(r.amount), r.currency, base, rateMap), 0);
   const balance = income - expense;
+
+  const missingCurrencies = [
+    ...new Set(
+      (monthRows ?? [])
+        .filter((r) => !canConvert(r.currency, base, rateMap))
+        .map((r) => r.currency),
+    ),
+  ];
 
   const monthLabel = new Intl.DateTimeFormat("es-CR", {
     month: "long",
@@ -140,6 +158,16 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
+        {missingCurrencies.length > 0 && (
+          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            ⚠️ No se incluyen movimientos en {missingCurrencies.join(", ")}: falta
+            su tipo de cambio.{" "}
+            <Link href="/dashboard/settings" className="underline">
+              Agregalo en Ajustes
+            </Link>
+            .
+          </p>
+        )}
       </section>
 
       {quickShortcuts.length > 0 && (

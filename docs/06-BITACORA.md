@@ -597,11 +597,12 @@ fecha); suficiente para MVP. Historial queda para referencia/reportes.
 1. ✅ RESUELTO (b… ) **Editar rompe gasto de grupo**: la página de edición ahora filtra
    `.is("group_id", null)` (un gasto de grupo da notFound) y `updateTransaction` valida que
    el movimiento no sea de grupo antes de tocar nada. Doble capa.
-2. **Saldos de grupo con ex-miembros** (`groups/[id]/page.tsx`): los saldos iteran solo
-   miembros actuales; splits/pagos de quien salió quedan huérfanos y descuadran. Fix:
-   incluir participantes históricos en el cálculo.
-3. **Conversión 1:1 silenciosa** (`lib/currency.ts` toBase): si falta la tasa, asume base
-   1:1 y descuadra totales sin avisar. Fix: excluir o marcar montos sin tasa.
+2. ✅ RESUELTO **Saldos de grupo con ex-miembros**: los saldos ahora se calculan sobre la
+   unión de participantes (miembros actuales + quienes pagaron o tienen splits), con
+   nombre "Ex-miembro" para los que ya no están. Cuadran en cero.
+3. ✅ RESUELTO **Conversión 1:1 silenciosa**: nuevo `canConvert`; dashboard y reportes
+   solo suman/grafican montos convertibles; el dashboard muestra un aviso ámbar listando
+   las monedas sin tipo de cambio (con enlace a Ajustes). Ya no se cuenta 1:1.
 4. **RLS insert transactions sin check de grupo** (`0007_group_expenses.sql`): agregar
    `with check (group_id is null or public.is_group_member(group_id))` (migración nueva).
 5. **Editar sin tasas pisa la moneda** (`TransactionForm.tsx`): hidden input fuerza base y

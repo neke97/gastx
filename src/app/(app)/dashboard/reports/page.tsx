@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryDonut, type DonutSlice } from "@/components/CategoryDonut";
 import { MonthlyBars, type MonthDatum } from "@/components/MonthlyBars";
 import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
-import { buildRateMap, toBase } from "@/lib/currency";
+import { buildRateMap, toBase, canConvert } from "@/lib/currency";
 
 const OTHER_COLOR = "#64748b";
 const MAX_SLICES = 8;
@@ -84,6 +84,7 @@ export default async function ReportsPage({
       name: string;
       color: string | null;
     } | null;
+    if (!canConvert(row.currency, base, rateMap)) continue; // sin tasa: no mezclar
     const name = cat?.name ?? "Sin categoría";
     const color = cat?.color ?? OTHER_COLOR;
     const value = toBase(Number(row.amount), row.currency, base, rateMap);
@@ -114,6 +115,7 @@ export default async function ReportsPage({
     const key = String(row.occurred_on).slice(0, 7);
     const idx = keyIndex.get(key);
     if (idx == null) continue;
+    if (!canConvert(row.currency, base, rateMap)) continue; // sin tasa: no mezclar
     const value = toBase(Number(row.amount), row.currency, base, rateMap);
     if (row.kind === "income") buckets[idx].income += value;
     else buckets[idx].expense += value;
