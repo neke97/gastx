@@ -6,6 +6,7 @@ import { quickAddFromTemplate } from "./recurring/actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
+import { buildRateMap, toBase, availableCurrencies } from "@/lib/currency";
 
 type Shortcut = {
   id: string;
@@ -18,6 +19,7 @@ type TxRow = {
   id: string;
   kind: "expense" | "income";
   amount: number;
+  currency: string;
   description: string | null;
   occurred_on: string;
   categories: { name: string } | null;
@@ -44,12 +46,16 @@ export default async function DashboardPage() {
   const nextMonthStart = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
 
   const [
+    { data: profile },
+    { data: rates },
     { data: categories },
     { data: people },
     { data: shortcuts },
     { data: transactions },
     { data: monthRows },
   ] = await Promise.all([
+    supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
+    supabase.from("exchange_rates").select("code, rate_to_base"),
     supabase
       .from("categories")
       .select("id, name, kind")
@@ -64,7 +70,7 @@ export default async function DashboardPage() {
     supabase
       .from("transactions")
       .select(
-        "id, kind, amount, description, occurred_on, categories(name), transaction_splits(amount_resolved, people(name))",
+        "id, kind, amount, currency, description, occurred_on, categories(name), transaction_splits(amount_resolved, people(name))",
       )
       .is("group_id", null)
       .order("occurred_on", { ascending: false })
@@ -72,7 +78,7 @@ export default async function DashboardPage() {
       .limit(30),
     supabase
       .from("transactions")
-      .select("kind, amount")
+      .select("kind, amount, currency")
       .is("group_id", null)
       .gte("occurred_on", monthStart)
       .lt("occurred_on", nextMonthStart),
@@ -81,12 +87,16 @@ export default async function DashboardPage() {
   const txs = (transactions ?? []) as unknown as TxRow[];
   const quickShortcuts = (shortcuts ?? []) as Shortcut[];
 
+  const base = profile?.default_currency ?? "CRC";
+  const rateMap = buildRateMap(rates);
+  const currencies = availableCurrencies(base, rateMap);
+
   const income = (monthRows ?? [])
     .filter((r) => r.kind === "income")
-    .reduce((sum, r) => sum + Number(r.amount), 0);
+    .reduce((sum, r) => sum + toBase(Number(r.amount), r.currency, base, rateMap), 0);
   const expense = (monthRows ?? [])
     .filter((r) => r.kind === "expense")
-    .reduce((sum, r) => sum + Number(r.amount), 0);
+    .reduce((sum, r) => sum + toBase(Number(r.amount), r.currency, base, rateMap), 0);
   const balance = income - expense;
 
   const monthLabel = new Intl.DateTimeFormat("es-CR", {
@@ -112,19 +122,19 @@ export default async function DashboardPage() {
               : "text-red-600 dark:text-red-400"
           }`}
         >
-          {formatMoney(balance)}
+          {formatMoney(balance, base)}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-xl bg-black/[0.03] px-3 py-2 dark:bg-white/[0.04]">
             <p className="text-black/50 dark:text-white/50">Ingresos</p>
             <p className="font-semibold text-emerald-600 dark:text-emerald-400">
-              {formatMoney(income)}
+              {formatMoney(income, base)}
             </p>
           </div>
           <div className="rounded-xl bg-black/[0.03] px-3 py-2 dark:bg-white/[0.04]">
             <p className="text-black/50 dark:text-white/50">Gastos</p>
             <p className="font-semibold text-red-600 dark:text-red-400">
-              {formatMoney(expense)}
+              {formatMoney(expense, base)}
             </p>
           </div>
         </div>
@@ -164,7 +174,12 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      <TransactionForm categories={categories ?? []} people={people ?? []} />
+      <TransactionForm
+        categories={categories ?? []}
+        people={people ?? []}
+        baseCurrency={base}
+        currencies={currencies}
+      />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
@@ -196,7 +211,7 @@ export default async function DashboardPage() {
                       {t.transaction_splits
                         .map(
                           (s) =>
-                            `${s.people?.name ?? "?"} ${formatMoney(s.amount_resolved)}`,
+                            `${s.people?.name ?? "?"} ${formatMoney(s.amount_resolved, t.currency)}`,
                         )
                         .join(" · ")}
                     </p>
@@ -211,7 +226,7 @@ export default async function DashboardPage() {
                     }`}
                   >
                     {t.kind === "income" ? "+" : "−"}
-                    {formatMoney(t.amount)}
+                    {formatMoney(t.amount, t.currency)}
                   </span>
                   <Link
                     href={`/dashboard/${t.id}`}

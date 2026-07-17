@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryDonut, type DonutSlice } from "@/components/CategoryDonut";
 import { MonthlyBars, type MonthDatum } from "@/components/MonthlyBars";
 import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
+import { buildRateMap, toBase } from "@/lib/currency";
 
 const OTHER_COLOR = "#64748b";
 const MAX_SLICES = 8;
@@ -54,21 +55,27 @@ export default async function ReportsPage({
     year: "numeric",
   }).format(new Date(Number(selectedYM.slice(0, 4)), Number(selectedYM.slice(5)) - 1, 1));
 
-  const [{ data: monthExpenses }, { data: windowRows }] = await Promise.all([
-    supabase
-      .from("transactions")
-      .select("amount, categories(name, color)")
-      .eq("kind", "expense")
-      .is("group_id", null)
-      .gte("occurred_on", monthStart)
-      .lt("occurred_on", nextMonthStart),
-    supabase
-      .from("transactions")
-      .select("kind, amount, occurred_on")
-      .is("group_id", null)
-      .gte("occurred_on", windowStart)
-      .lt("occurred_on", nextMonthStart),
-  ]);
+  const [{ data: profile }, { data: rates }, { data: monthExpenses }, { data: windowRows }] =
+    await Promise.all([
+      supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
+      supabase.from("exchange_rates").select("code, rate_to_base"),
+      supabase
+        .from("transactions")
+        .select("amount, currency, categories(name, color)")
+        .eq("kind", "expense")
+        .is("group_id", null)
+        .gte("occurred_on", monthStart)
+        .lt("occurred_on", nextMonthStart),
+      supabase
+        .from("transactions")
+        .select("kind, amount, currency, occurred_on")
+        .is("group_id", null)
+        .gte("occurred_on", windowStart)
+        .lt("occurred_on", nextMonthStart),
+    ]);
+
+  const base = profile?.default_currency ?? "CRC";
+  const rateMap = buildRateMap(rates);
 
   // ---- Dona: gastos del mes seleccionado por categoría ----
   const byCat = new Map<string, DonutSlice>();
@@ -79,9 +86,10 @@ export default async function ReportsPage({
     } | null;
     const name = cat?.name ?? "Sin categoría";
     const color = cat?.color ?? OTHER_COLOR;
+    const value = toBase(Number(row.amount), row.currency, base, rateMap);
     const prev = byCat.get(name);
-    if (prev) prev.amount += Number(row.amount);
-    else byCat.set(name, { name, color, amount: Number(row.amount) });
+    if (prev) prev.amount += value;
+    else byCat.set(name, { name, color, amount: value });
   }
   let slices = [...byCat.values()].sort((a, b) => b.amount - a.amount);
   if (slices.length > MAX_SLICES) {
@@ -106,8 +114,9 @@ export default async function ReportsPage({
     const key = String(row.occurred_on).slice(0, 7);
     const idx = keyIndex.get(key);
     if (idx == null) continue;
-    if (row.kind === "income") buckets[idx].income += Number(row.amount);
-    else buckets[idx].expense += Number(row.amount);
+    const value = toBase(Number(row.amount), row.currency, base, rateMap);
+    if (row.kind === "income") buckets[idx].income += value;
+    else buckets[idx].expense += value;
   }
   const trend: TrendPoint[] = buckets.map((b) => ({
     label: b.label,

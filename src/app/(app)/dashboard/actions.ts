@@ -135,12 +135,15 @@ export async function addTransaction(
   const split = await buildSplitRows(supabase, user.id, amount, formData);
   if (split.error) return { error: split.error };
 
+  const currency = String(formData.get("currency") ?? "").trim() || "CRC";
+
   const { data: inserted, error } = await supabase
     .from("transactions")
     .insert({
       user_id: user.id,
       kind,
       amount,
+      currency,
       category_id: categoryId ? String(categoryId) : null,
       description: description || null,
       ...(occurredOn ? { occurred_on: occurredOn } : {}),
@@ -208,11 +211,14 @@ export async function updateTransaction(
   const split = await buildSplitRows(supabase, user.id, amount, formData);
   if (split.error) return { error: split.error };
 
+  const currency = String(formData.get("currency") ?? "").trim() || "CRC";
+
   const { error } = await supabase
     .from("transactions")
     .update({
       kind,
       amount,
+      currency,
       category_id: categoryId ? String(categoryId) : null,
       description: description || null,
       ...(occurredOn ? { occurred_on: occurredOn } : {}),

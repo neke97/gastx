@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/dashboard/categories", label: "Categorías", icon: "🏷️" },
   { href: "/dashboard/people", label: "Personas", icon: "🙋" },
   { href: "/dashboard/groups", label: "Grupos", icon: "👥" },
+  { href: "/dashboard/settings", label: "Ajustes (moneda)", icon: "⚙️" },
 ];
 
 export default async function MorePage() {

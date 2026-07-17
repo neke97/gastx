@@ -19,6 +19,7 @@ type Initial = {
   category_id: string | null;
   description: string | null;
   occurred_on: string;
+  currency?: string;
 };
 
 type SplitRow = { id: number; personId: string; value: string };
@@ -48,11 +49,15 @@ export function TransactionForm({
   people = [],
   initial,
   initialSplits = [],
+  baseCurrency = "CRC",
+  currencies = ["CRC"],
 }: {
   categories: Category[];
   people?: Person[];
   initial?: Initial;
   initialSplits?: InitialSplit[];
+  baseCurrency?: string;
+  currencies?: string[];
 }) {
   const isEdit = Boolean(initial);
   const today = toYMD(new Date());
@@ -162,21 +167,41 @@ export function TransactionForm({
       </div>
       <input type="hidden" name="kind" value={kind} />
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Monto (₡)</span>
-        <input
-          type="number"
-          name="amount"
-          required
-          min="0"
-          step="0.01"
-          inputMode="decimal"
-          placeholder="0"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className={inputClasses}
-        />
-      </label>
+      <div className="flex gap-2">
+        <label className="flex flex-1 flex-col gap-1 text-sm">
+          <span className="font-medium">Monto</span>
+          <input
+            type="number"
+            name="amount"
+            required
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className={inputClasses}
+          />
+        </label>
+        {currencies.length > 1 ? (
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">Moneda</span>
+            <select
+              name="currency"
+              defaultValue={initial?.currency ?? baseCurrency}
+              className={selectClasses}
+            >
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <input type="hidden" name="currency" value={baseCurrency} />
+        )}
+      </div>
 
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Categoría</span>

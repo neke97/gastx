@@ -59,6 +59,27 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Multi-moneda
+
+**Hecho:**
+- Migración `0008_exchange_rates.sql`: tabla `exchange_rates` (user_id, code,
+  rate_to_base) + RLS. Moneda base = `profiles.default_currency`. **Falta aplicarla.**
+- `src/lib/currency.ts`: `toBase`, `buildRateMap`, `availableCurrencies`, `COMMON_CURRENCIES`.
+- Página `/dashboard/settings` (Ajustes): cambiar moneda base + gestionar tipos de cambio.
+- `TransactionForm`: selector de moneda (aparece solo si hay tasas cargadas); guarda
+  `currency`. `addTransaction`/`updateTransaction` guardan la moneda.
+- Dashboard y Reportes: cada movimiento se muestra en su moneda; los totales/gráficos se
+  convierten a base con las tasas.
+- Enlace "Ajustes (moneda)" en Más.
+- Fix: los archivos `"use server"` no pueden exportar objetos (quité el re-export de
+  COMMON_CURRENCIES de actions).
+- **Verificado:** `npm run build` OK.
+
+**Pendientes multi-moneda (futuro):** grupos/recurrentes/cuotas siguen en base; los charts
+de reportes formatean con símbolo por defecto (CRC) — corregir si la base pasa a no ser CRC.
+
+---
+
 ## 2026-07-17 — Fase 7 (parte 2): gastos compartidos y saldos
 
 **Hecho:**
