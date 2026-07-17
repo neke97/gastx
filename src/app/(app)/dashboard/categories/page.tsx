@@ -4,12 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryForm } from "@/components/CategoryForm";
 import { toggleArchiveCategory, deleteCategory } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { categoryIcon } from "@/lib/categoryIcons";
 
 type Category = {
   id: string;
   name: string;
   kind: "expense" | "income";
   color: string | null;
+  icon: string | null;
   is_archived: boolean;
 };
 
@@ -18,9 +20,11 @@ function CategoryRow({ c }: { c: Category }) {
     <li className="flex items-center justify-between gap-3 px-4 py-3">
       <div className="flex min-w-0 items-center gap-3">
         <span
-          className="h-4 w-4 shrink-0 rounded-full"
-          style={{ backgroundColor: c.color ?? "#94a3b8" }}
-        />
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base"
+          style={{ backgroundColor: (c.color ?? "#94a3b8") + "22" }}
+        >
+          {categoryIcon(c.icon)}
+        </span>
         <span
           className={`truncate text-sm ${c.is_archived ? "text-black/40 line-through dark:text-white/40" : ""}`}
         >
@@ -72,7 +76,7 @@ export default async function CategoriesPage() {
 
   const { data } = await supabase
     .from("categories")
-    .select("id, name, kind, color, is_archived")
+    .select("id, name, kind, color, icon, is_archived")
     .order("is_archived")
     .order("name");
 

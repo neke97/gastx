@@ -245,7 +245,7 @@ export function TransactionForm({
             onClick={() => setDate(today)}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               date === today
-                ? "bg-emerald-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "border border-black/15 dark:border-white/15"
             }`}
           >
@@ -256,7 +256,7 @@ export function TransactionForm({
             onClick={() => setDate(yesterday)}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               date === yesterday
-                ? "bg-emerald-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "border border-black/15 dark:border-white/15"
             }`}
           >
@@ -300,7 +300,7 @@ export function TransactionForm({
                     onClick={() => setSplitMode(m)}
                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                       splitMode === m
-                        ? "bg-emerald-600 text-white"
+                        ? "bg-blue-600 text-white"
                         : "border border-black/15 dark:border-white/15"
                     }`}
                   >
@@ -315,11 +315,15 @@ export function TransactionForm({
                     ? round2((amountNum * (Number(row.value) || 0)) / 100)
                     : Number(row.value) || 0;
                 return (
-                  <div key={row.id} className="flex items-center gap-2">
+                  <div
+                    key={row.id}
+                    className="flex flex-col gap-2 rounded-lg border border-black/10 p-2.5 dark:border-white/10"
+                  >
+                    {/* Persona: a todo el ancho para que se lea completo */}
                     <select
                       value={row.personId}
                       onChange={(e) => setRow(row.id, { personId: e.target.value })}
-                      className={`min-w-0 flex-1 ${selectClasses} py-2`}
+                      className={`w-full ${selectClasses} py-2`}
                     >
                       {people.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -327,27 +331,31 @@ export function TransactionForm({
                         </option>
                       ))}
                     </select>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputMode="decimal"
-                      placeholder={splitMode === "percent" ? "%" : "₡"}
-                      value={row.value}
-                      onChange={(e) => setRow(row.id, { value: e.target.value })}
-                      className={`w-24 ${inputClasses} py-2`}
-                    />
-                    <span className="w-20 shrink-0 text-right text-xs text-black/50 dark:text-white/50">
-                      {splitMode === "percent" ? formatMoney(resolved) : ""}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeRow(row.id)}
-                      aria-label="Quitar"
-                      className="rounded-md px-2 py-1 text-black/40 hover:text-red-600 dark:text-white/40 dark:hover:text-red-400"
-                    >
-                      ✕
-                    </button>
+                    {/* Monto/%, equivalente y quitar */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        placeholder={splitMode === "percent" ? "%" : "₡"}
+                        value={row.value}
+                        onChange={(e) => setRow(row.id, { value: e.target.value })}
+                        className={`w-28 ${inputClasses} py-2`}
+                      />
+                      <span className="flex-1 text-xs text-black/50 dark:text-white/50">
+                        {splitMode === "percent" ? `= ${formatMoney(resolved)}` : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeRow(row.id)}
+                        aria-label="Quitar persona"
+                        title="Quitar"
+                        className="rounded-md px-2 py-1 text-black/40 hover:bg-red-500/10 hover:text-red-600 dark:text-white/40 dark:hover:text-red-400"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
                 );
               })}

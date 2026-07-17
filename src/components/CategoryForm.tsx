@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { addCategory, type CatFormState } from "@/app/(app)/dashboard/categories/actions";
+import { CATEGORY_EMOJIS } from "@/lib/categoryIcons";
 
 const PALETTE = [
   "#059669",
@@ -20,6 +21,7 @@ const PALETTE = [
 export function CategoryForm() {
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [color, setColor] = useState(PALETTE[0]);
+  const [icon, setIcon] = useState(CATEGORY_EMOJIS[0]);
   const [state, formAction, pending] = useActionState<CatFormState, FormData>(
     addCategory,
     null,
@@ -31,6 +33,7 @@ export function CategoryForm() {
       formRef.current?.reset();
       setKind("expense");
       setColor(PALETTE[0]);
+      setIcon(CATEGORY_EMOJIS[0]);
     }
   }, [state]);
 
@@ -91,6 +94,28 @@ export function CategoryForm() {
         </div>
       </div>
       <input type="hidden" name="color" value={color} />
+
+      <div className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium">Ícono</span>
+        <div className="grid max-h-32 grid-cols-8 gap-1 overflow-y-auto rounded-lg border border-black/10 p-2 dark:border-white/10">
+          {CATEGORY_EMOJIS.map((e) => (
+            <button
+              key={e}
+              type="button"
+              onClick={() => setIcon(e)}
+              aria-label={`Ícono ${e}`}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg text-lg transition-colors ${
+                icon === e
+                  ? "bg-blue-600/20 ring-2 ring-blue-500"
+                  : "hover:bg-black/[0.05] dark:hover:bg-white/[0.08]"
+              }`}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      </div>
+      <input type="hidden" name="icon" value={icon} />
 
       {state?.error && (
         <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>

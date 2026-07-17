@@ -87,7 +87,7 @@ export default async function GroupsPage() {
                     <input type="hidden" name="invite_id" value={inv.id} />
                     <SubmitButton
                       pendingLabel="…"
-                      className="rounded-lg border border-black/15 px-3 py-1.5 text-xs transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+                      className="rounded-lg border border-red-500/40 px-3 py-1.5 text-xs text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
                     >
                       Rechazar
                     </SubmitButton>

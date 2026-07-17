@@ -7,6 +7,7 @@ import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 import { buildRateMap, toBase, availableCurrencies } from "@/lib/currency";
+import { categoryIcon } from "@/lib/categoryIcons";
 
 type Shortcut = {
   id: string;
@@ -23,7 +24,7 @@ type TxRow = {
   currency: string;
   description: string | null;
   occurred_on: string;
-  categories: { name: string } | null;
+  categories: { name: string; icon: string | null; color: string | null } | null;
   transaction_splits: {
     amount_resolved: number;
     people: { name: string } | null;
@@ -71,7 +72,7 @@ export default async function DashboardPage() {
     supabase
       .from("transactions")
       .select(
-        "id, kind, amount, currency, description, occurred_on, categories(name), transaction_splits(amount_resolved, people(name))",
+        "id, kind, amount, currency, description, occurred_on, categories(name, icon, color), transaction_splits(amount_resolved, people(name))",
       )
       .is("group_id", null)
       .order("occurred_on", { ascending: false })
@@ -198,7 +199,17 @@ export default async function DashboardPage() {
                 key={t.id}
                 className="flex items-center justify-between gap-3 px-4 py-3"
               >
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg"
+                    style={{
+                      backgroundColor:
+                        (t.categories?.color ?? "#94a3b8") + "22",
+                    }}
+                  >
+                    {categoryIcon(t.categories?.icon)}
+                  </span>
+                  <div className="min-w-0">
                   <p className="truncate text-sm font-medium">
                     {t.description || t.categories?.name || "Movimiento"}
                   </p>
@@ -217,6 +228,7 @@ export default async function DashboardPage() {
                         .join(" · ")}
                     </p>
                   )}
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span

@@ -572,6 +572,43 @@ fecha); suficiente para MVP. Historial queda para referencia/reportes.
 
 ---
 
+## 2026-07-17 — Mejoras de UX + íconos de categorías
+
+**Hecho:**
+- **Editor de división** rediseñado: la persona ocupa toda la fila (nombres completos);
+  monto/% + equivalente + ✕ en una fila debajo, dentro de una tarjeta.
+- **Colores de botones:** verde (emerald) solo para OK/confirmar e "Ingreso"; rojo para
+  "Gasto" y "NO" (Rechazar invitación ahora rojo); los toggles secundarios (Hoy/Ayer,
+  Por monto/Por %) pasaron a **azul**.
+- **Íconos de categorías (emoji):** `src/lib/categoryIcons.ts` (set de emojis + mapa de
+  nombres lucide viejos → emoji). `CategoryForm` con selector de emoji. Se muestran en la
+  página de categorías (círculo con el color) y en la **lista de movimientos** del
+  dashboard (badge a la izquierda de cada movimiento). `addCategory` guarda `icon`.
+- Migración `0010_category_emoji.sql`: convierte categorías existentes (lucide→emoji) y
+  recrea `seed_default_categories` con emoji para usuarios nuevos. **Falta aplicarla.**
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0010_category_emoji.sql` en Supabase.
+
+---
+
+## PENDIENTES DE ARREGLAR (code-review 2026-07-17) — hacer después de las mejoras de UX
+
+1. **Editar rompe gasto de grupo** (`dashboard/[id]/page.tsx`): la edición carga cualquier
+   transacción por id; al guardar un gasto de grupo, `updateTransaction` borra sus splits
+   de miembros y no reinserta → saldos rotos. Fix: excluir `group_id` (notFound si es de grupo).
+2. **Saldos de grupo con ex-miembros** (`groups/[id]/page.tsx`): los saldos iteran solo
+   miembros actuales; splits/pagos de quien salió quedan huérfanos y descuadran. Fix:
+   incluir participantes históricos en el cálculo.
+3. **Conversión 1:1 silenciosa** (`lib/currency.ts` toBase): si falta la tasa, asume base
+   1:1 y descuadra totales sin avisar. Fix: excluir o marcar montos sin tasa.
+4. **RLS insert transactions sin check de grupo** (`0007_group_expenses.sql`): agregar
+   `with check (group_id is null or public.is_group_member(group_id))` (migración nueva).
+5. **Editar sin tasas pisa la moneda** (`TransactionForm.tsx`): hidden input fuerza base y
+   sobreescribe la moneda original. Fix: preservar `initial.currency` aunque no haya tasa.
+6. **Preview de cuota siempre en CRC** (`InstallmentForm.tsx`): el "≈ X por cuota" ignora
+   la moneda elegida. Fix: formatear con la moneda seleccionada (estado controlado).
+
 <!-- Plantilla para nuevas entradas:
 
 ## AAAA-MM-DD — Título corto

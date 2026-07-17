@@ -24,6 +24,7 @@ export async function addCategory(
   const name = String(formData.get("name") ?? "").trim();
   const kind = String(formData.get("kind") ?? "expense");
   const color = String(formData.get("color") ?? "").trim() || null;
+  const icon = String(formData.get("icon") ?? "").trim() || null;
 
   if (!name) return { error: "Escribí un nombre para la categoría." };
   if (kind !== "expense" && kind !== "income") {
@@ -32,7 +33,7 @@ export async function addCategory(
 
   const { error } = await supabase
     .from("categories")
-    .insert({ user_id: user.id, name, kind, color });
+    .insert({ user_id: user.id, name, kind, color, icon });
 
   if (error) return { error: error.message };
 
