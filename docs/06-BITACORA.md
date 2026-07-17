@@ -40,6 +40,23 @@ se mantiene igual. Build muestra "ƒ Proxy (Middleware)".
 
 **Aprendizaje:** con `src/app`, los archivos de convención de proxy van en `src/`.
 
+### Seguimiento: el Proxy causaba 404 en TODAS las rutas
+
+`gastx.vercel.app` daba 404 aunque el deploy estaba "Ready". Reproducido en local
+(`GET /dashboard 404`, con error "Could not parse module '[project]/middleware.ts'" en un
+chunk **edge**). Causa: el Proxy se bundleaba/corría en **Edge**, donde `@supabase/ssr`
+no carga → el Proxy crasheaba, y como su `matcher` intercepta todo, cada ruta daba 404.
+
+**Solución definitiva:** se ELIMINÓ el Proxy (`src/proxy.ts`) y su helper
+`src/lib/supabase/middleware.ts`. No es imprescindible: cada página protegida ya valida
+sesión con `supabase.auth.getUser()` (server client). 
+
+**Verificado localmente** con `npm run build` + `npm start` + curl: `/` 200, `/login` 200
+(form completo), `/dashboard` sin sesión = redirect (no 404), `/manifest.webmanifest` 200.
+
+**Pendiente futuro (opcional):** reintroducir refresco de sesión de forma compatible
+(p.ej. Proxy forzado a Node runtime cuando esté claro cómo, o refresco en route handler).
+
 ---
 
 ## 2026-07-16 — Despliegue 🚀
