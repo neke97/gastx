@@ -16,18 +16,24 @@ export default async function EditTransactionPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: categories }, { data: tx }] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, name, kind")
-      .eq("is_archived", false)
-      .order("name"),
-    supabase
-      .from("transactions")
-      .select("id, kind, amount, category_id, description, occurred_on")
-      .eq("id", id)
-      .maybeSingle(),
-  ]);
+  const [{ data: categories }, { data: people }, { data: tx }, { data: splits }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, kind")
+        .eq("is_archived", false)
+        .order("name"),
+      supabase.from("people").select("id, name").order("name"),
+      supabase
+        .from("transactions")
+        .select("id, kind, amount, category_id, description, occurred_on")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("transaction_splits")
+        .select("person_id, split_mode, value")
+        .eq("transaction_id", id),
+    ]);
 
   if (!tx) notFound();
 
@@ -43,7 +49,18 @@ export default async function EditTransactionPage({
         <h1 className="text-xl font-bold tracking-tight">Editar movimiento</h1>
       </header>
 
-      <TransactionForm categories={categories ?? []} initial={tx} />
+      <TransactionForm
+        categories={categories ?? []}
+        people={people ?? []}
+        initial={tx}
+        initialSplits={
+          (splits ?? []) as {
+            person_id: string;
+            split_mode: "amount" | "percent";
+            value: number;
+          }[]
+        }
+      />
     </main>
   );
 }

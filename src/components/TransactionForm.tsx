@@ -22,6 +22,11 @@ type Initial = {
 };
 
 type SplitRow = { id: number; personId: string; value: string };
+type InitialSplit = {
+  person_id: string;
+  split_mode: "amount" | "percent";
+  value: number;
+};
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -42,10 +47,12 @@ export function TransactionForm({
   categories,
   people = [],
   initial,
+  initialSplits = [],
 }: {
   categories: Category[];
   people?: Person[];
   initial?: Initial;
+  initialSplits?: InitialSplit[];
 }) {
   const isEdit = Boolean(initial);
   const today = toYMD(new Date());
@@ -59,11 +66,19 @@ export function TransactionForm({
   );
   const [date, setDate] = useState(initial?.occurred_on ?? today);
 
-  // División (solo al crear)
-  const [splitOn, setSplitOn] = useState(false);
-  const [splitMode, setSplitMode] = useState<"amount" | "percent">("amount");
-  const nextId = useRef(1);
-  const [rows, setRows] = useState<SplitRow[]>([]);
+  // División (crear o editar). En edición se precarga desde initialSplits.
+  const [splitOn, setSplitOn] = useState(initialSplits.length > 0);
+  const [splitMode, setSplitMode] = useState<"amount" | "percent">(
+    initialSplits[0]?.split_mode ?? "amount",
+  );
+  const nextId = useRef(initialSplits.length + 1);
+  const [rows, setRows] = useState<SplitRow[]>(
+    initialSplits.map((s, i) => ({
+      id: i + 1,
+      personId: s.person_id,
+      value: String(s.value),
+    })),
+  );
 
   const [state, formAction, pending] = useActionState<TxFormState, FormData>(
     isEdit ? updateTransaction : addTransaction,
@@ -225,9 +240,8 @@ export function TransactionForm({
         </div>
       </div>
 
-      {/* ---- División entre personas (solo al crear) ---- */}
-      {!isEdit && (
-        <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
+      {/* ---- División entre personas (crear o editar) ---- */}
+      <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
           <label className="flex items-center gap-2 text-sm font-medium">
             <input
               type="checkbox"
@@ -352,7 +366,6 @@ export function TransactionForm({
             </>
           )}
         </div>
-      )}
 
       {state?.error && (
         <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>

@@ -205,6 +205,9 @@ export async function updateTransaction(
     return { error: "El monto debe ser mayor a 0." };
   }
 
+  const split = await buildSplitRows(supabase, user.id, amount, formData);
+  if (split.error) return { error: split.error };
+
   const { error } = await supabase
     .from("transactions")
     .update({
@@ -218,6 +221,24 @@ export async function updateTransaction(
     .eq("user_id", user.id);
 
   if (error) return { error: error.message };
+
+  // Reemplazar la división: borrar la anterior y (si hay) insertar la nueva.
+  await supabase.from("transaction_splits").delete().eq("transaction_id", id);
+  if (split.mode && split.rows) {
+    const rows = split.rows.map((r) => ({
+      transaction_id: id,
+      person_id: r.person_id,
+      split_mode: split.mode!,
+      value: r.value,
+      amount_resolved: r.amount_resolved,
+    }));
+    const { error: splitErr } = await supabase
+      .from("transaction_splits")
+      .insert(rows);
+    if (splitErr) {
+      return { error: `No se pudo guardar la división: ${splitErr.message}` };
+    }
+  }
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
