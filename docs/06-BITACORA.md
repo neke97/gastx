@@ -59,6 +59,33 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Fase 7 (parte 1): grupos compartidos reales
+
+**Hecho:**
+- Migración `supabase/migrations/0006_groups.sql`: `groups`, `group_members`,
+  `group_invites`. RLS **solo de SELECT**; las mutaciones van por funciones
+  **SECURITY DEFINER** (`create_group`, `invite_to_group`, `accept_group_invite`,
+  `decline_group_invite`, `leave_group`, `remove_group_member`, `delete_group`,
+  `rename_group`). Funciones de apoyo `is_group_member`/`is_group_owner`/`shares_group`
+  evitan la recursión de RLS. Política extra en `profiles` para ver display_name de
+  compañeros de grupo. **Falta aplicarla en Supabase.**
+- Acciones (`groups/actions.ts`) vía `supabase.rpc(...)`.
+- UI: `/dashboard/groups` (crear + invitaciones pendientes + mis grupos) y
+  `/dashboard/groups/[id]` (miembros, invitar por correo, invitaciones pendientes,
+  salir/borrar). Componentes `CreateGroupForm`, `InviteMemberForm`. Enlace "Grupos" en Más.
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0006_groups.sql` en el SQL Editor de Supabase.
+
+**Nota:** el flujo de invitación es por correo; el invitado ve la invitación al iniciar
+sesión con ese correo (no hay envío de email todavía; es in-app). Envío de email real =
+mejora futura (Supabase/Resend).
+
+**Siguiente (Fase 7, parte 2):** gastos compartidos dentro del grupo (columna `group_id`
+en transactions + RLS para miembros + división entre miembros reales + saldos).
+
+---
+
 ## 2026-07-17 — Cabos menores: editar división, tendencia, filtro por mes
 
 **Hecho:**

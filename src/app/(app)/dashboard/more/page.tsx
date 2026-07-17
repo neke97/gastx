@@ -6,7 +6,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 
 const LINKS = [
   { href: "/dashboard/categories", label: "Categorías", icon: "🏷️" },
-  { href: "/dashboard/people", label: "Personas", icon: "👥" },
+  { href: "/dashboard/people", label: "Personas", icon: "🙋" },
+  { href: "/dashboard/groups", label: "Grupos", icon: "👥" },
 ];
 
 export default async function MorePage() {
