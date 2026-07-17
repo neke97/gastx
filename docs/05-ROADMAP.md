@@ -18,7 +18,7 @@ futuras sin acordarlo.
 - [x] Auth (login/registro con Supabase): middleware de sesión, `/login`, `/dashboard` protegido, salir.
 - [x] Migraciones: `profiles`, `categories`, `transactions` (`supabase/migrations/0001_core.sql`). *Falta aplicarla en Supabase.*
 - [x] Seed de categorías por defecto (trigger `on_auth_user_created`).
-- [x] CRUD de transacciones: agregar, listar, borrar y **editar** (`/dashboard/[id]`).
+- [x] CRUD de transacciones: agregar, listar, borrar y **editar** (`/dashboard/[id]`, incluye editar la división).
 - [x] Dashboard básico: totales del mes y balance.
 - [x] Formato CRC y fechas `es-CR` (`src/lib/format.ts`).
 
@@ -51,10 +51,10 @@ futuras sin acordarlo.
 ## Fase 5 — Reportes y gráficos
 - [x] Distribución por categoría (dona) en `/dashboard/reports` (con % en leyenda).
 - [x] Ingresos vs egresos por mes (barras, últimos 6 meses) + tabla de valores.
-- [x] % por categoría (en la leyenda de la dona). Tendencia en línea: pendiente.
-- [ ] Filtros por fecha/categoría (hoy: mes actual para la dona, últimos 6 meses para barras).
+- [x] % por categoría (leyenda de la dona) + **tendencia del balance en línea** (`BalanceTrend`).
+- [x] Filtro por **mes** en reportes (navegador ← mes →, vía `?month=YYYY-MM`); barras/tendencia = 6 meses terminando en el mes elegido.
 
-**Fase 5 base completa ✅** (pendiente menor: gráfico de tendencia en línea y filtros).
+**Fase 5 completa ✅**
 
 ## Fase 6 — Pulido y PWA completa
 - [x] Navegación móvil: barra inferior (bottom nav) + sección "Más"; loading entre pantallas.

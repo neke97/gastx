@@ -59,6 +59,24 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Cabos menores: editar división, tendencia, filtro por mes
+
+**Hecho:**
+- **Editar división:** `TransactionForm` muestra el editor de división también en edición
+  (precargado desde `initialSplits`); `updateTransaction` reemplaza los splits
+  (borra + reinserta, valida suma); la página de edición carga personas + splits.
+- **Tendencia:** nuevo `BalanceTrend` (línea SVG del balance neto por mes, 6 meses),
+  con línea base en cero y tooltips por punto.
+- **Filtro por mes:** Reportes ahora tiene navegador ← mes → (`?month=YYYY-MM`); la dona
+  usa el mes elegido y las barras/tendencia son los 6 meses que terminan en ese mes.
+  "Mes sig." se deshabilita si ya estás en el mes actual.
+- **Verificado:** `npm run build` OK.
+
+**Fase 5 completa. Cabos menores cerrados.** Queda pendiente solo la Fase 7 (grupos,
+multi-moneda, licencias) y el refresco de sesión opcional.
+
+---
+
 ## 2026-07-17 — Recurrentes como "atajos" (tocar para registrar)
 
 **Aclaración del usuario:** no quería tanto la generación automática, sino una LISTA de

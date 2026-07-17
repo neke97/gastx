@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryDonut, type DonutSlice } from "@/components/CategoryDonut";
 import { MonthlyBars, type MonthDatum } from "@/components/MonthlyBars";
+import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
 
 const OTHER_COLOR = "#64748b";
 const MAX_SLICES = 8;
@@ -10,8 +11,24 @@ const MAX_SLICES = 8;
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
+function ym(d: Date) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+}
+function firstOfMonth(ymStr: string) {
+  return `${ymStr}-01`;
+}
+/** Suma `months` (puede ser negativo) a un "YYYY-MM" y devuelve "YYYY-MM". */
+function addMonths(ymStr: string, months: number) {
+  const [y, m] = ymStr.split("-").map(Number);
+  const d = new Date(y, m - 1 + months, 1);
+  return ym(d);
+}
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,15 +36,25 @@ export default async function ReportsPage() {
   if (!user) redirect("/login");
 
   const now = new Date();
-  const monthStart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const nextMonthStart = `${next.getFullYear()}-${pad(next.getMonth() + 1)}-01`;
+  const currentYM = ym(now);
+  const { month } = await searchParams;
+  // Mes seleccionado (validado); por defecto el mes actual.
+  const selectedYM = /^\d{4}-\d{2}$/.test(month ?? "") ? month! : currentYM;
 
-  // Inicio de la ventana de 6 meses (mes actual incluido).
-  const windowStartDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  const windowStart = `${windowStartDate.getFullYear()}-${pad(windowStartDate.getMonth() + 1)}-01`;
+  const monthStart = firstOfMonth(selectedYM);
+  const nextMonthStart = firstOfMonth(addMonths(selectedYM, 1));
+  const windowStart = firstOfMonth(addMonths(selectedYM, -5));
 
-  const [{ data: monthExpenses }, { data: sixMonths }] = await Promise.all([
+  const prevYM = addMonths(selectedYM, -1);
+  const nextYM = addMonths(selectedYM, 1);
+  const canGoNext = selectedYM < currentYM;
+
+  const monthLabel = new Intl.DateTimeFormat("es-CR", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(Number(selectedYM.slice(0, 4)), Number(selectedYM.slice(5)) - 1, 1));
+
+  const [{ data: monthExpenses }, { data: windowRows }] = await Promise.all([
     supabase
       .from("transactions")
       .select("amount, categories(name, color)")
@@ -37,10 +64,11 @@ export default async function ReportsPage() {
     supabase
       .from("transactions")
       .select("kind, amount, occurred_on")
-      .gte("occurred_on", windowStart),
+      .gte("occurred_on", windowStart)
+      .lt("occurred_on", nextMonthStart),
   ]);
 
-  // ---- Dona: gastos del mes por categoría ----
+  // ---- Dona: gastos del mes seleccionado por categoría ----
   const byCat = new Map<string, DonutSlice>();
   for (const row of monthExpenses ?? []) {
     const cat = row.categories as unknown as {
@@ -62,23 +90,30 @@ export default async function ReportsPage() {
   }
   const totalExpenses = slices.reduce((s, x) => s + x.amount, 0);
 
-  // ---- Barras: ingresos vs gastos, últimos 6 meses ----
+  // ---- Barras + tendencia: 6 meses terminando en el seleccionado ----
   const buckets: MonthDatum[] = [];
   const keyIndex = new Map<string, number>();
   const fmtMonth = new Intl.DateTimeFormat("es-CR", { month: "short" });
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    const key = addMonths(selectedYM, -i);
+    const d = new Date(Number(key.slice(0, 4)), Number(key.slice(5)) - 1, 1);
     keyIndex.set(key, buckets.length);
     buckets.push({ label: fmtMonth.format(d), income: 0, expense: 0 });
   }
-  for (const row of sixMonths ?? []) {
+  for (const row of windowRows ?? []) {
     const key = String(row.occurred_on).slice(0, 7);
     const idx = keyIndex.get(key);
     if (idx == null) continue;
     if (row.kind === "income") buckets[idx].income += Number(row.amount);
     else buckets[idx].expense += Number(row.amount);
   }
+  const trend: TrendPoint[] = buckets.map((b) => ({
+    label: b.label,
+    value: b.income - b.expense,
+  }));
+
+  const navBtn =
+    "rounded-lg border border-black/15 px-3 py-1.5 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]";
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -92,24 +127,48 @@ export default async function ReportsPage() {
         <h1 className="text-xl font-bold tracking-tight">Reportes</h1>
       </header>
 
+      {/* Filtro por mes */}
+      <div className="flex items-center justify-between gap-2">
+        <Link href={`/dashboard/reports?month=${prevYM}`} className={navBtn}>
+          ← Mes ant.
+        </Link>
+        <span className="text-sm font-medium capitalize">{monthLabel}</span>
+        {canGoNext ? (
+          <Link href={`/dashboard/reports?month=${nextYM}`} className={navBtn}>
+            Mes sig. →
+          </Link>
+        ) : (
+          <span className={`${navBtn} pointer-events-none opacity-40`}>
+            Mes sig. →
+          </span>
+        )}
+      </div>
+
       <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
-          En qué se va la plata (este mes)
+          En qué se va la plata
         </h2>
         {totalExpenses > 0 ? (
           <CategoryDonut slices={slices} total={totalExpenses} />
         ) : (
           <p className="py-6 text-center text-sm text-black/50 dark:text-white/50">
-            No hay gastos este mes todavía.
+            No hay gastos en este mes.
           </p>
         )}
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
-          Ingresos vs gastos (últimos 6 meses)
+          Ingresos vs gastos (6 meses)
         </h2>
         <MonthlyBars data={buckets} />
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+        <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
+          Tendencia del balance
+        </h2>
+        <BalanceTrend data={trend} />
       </section>
     </main>
   );
