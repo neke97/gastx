@@ -594,9 +594,9 @@ fecha); suficiente para MVP. Historial queda para referencia/reportes.
 
 ## PENDIENTES DE ARREGLAR (code-review 2026-07-17) — hacer después de las mejoras de UX
 
-1. **Editar rompe gasto de grupo** (`dashboard/[id]/page.tsx`): la edición carga cualquier
-   transacción por id; al guardar un gasto de grupo, `updateTransaction` borra sus splits
-   de miembros y no reinserta → saldos rotos. Fix: excluir `group_id` (notFound si es de grupo).
+1. ✅ RESUELTO (b… ) **Editar rompe gasto de grupo**: la página de edición ahora filtra
+   `.is("group_id", null)` (un gasto de grupo da notFound) y `updateTransaction` valida que
+   el movimiento no sea de grupo antes de tocar nada. Doble capa.
 2. **Saldos de grupo con ex-miembros** (`groups/[id]/page.tsx`): los saldos iteran solo
    miembros actuales; splits/pagos de quien salió quedan huérfanos y descuadran. Fix:
    incluir participantes históricos en el cálculo.

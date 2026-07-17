@@ -37,6 +37,7 @@ export default async function EditTransactionPage({
       .from("transactions")
       .select("id, kind, amount, currency, category_id, description, occurred_on")
       .eq("id", id)
+      .is("group_id", null) // los gastos de grupo se editan desde el grupo
       .maybeSingle(),
     supabase
       .from("transaction_splits")

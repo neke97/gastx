@@ -195,6 +195,19 @@ export async function updateTransaction(
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "Falta el identificador del movimiento." };
 
+  // No editar aquí gastos de grupo: se manejan desde el grupo y su división es
+  // entre miembros reales (editarlos acá borraría esos splits).
+  const { data: existing } = await supabase
+    .from("transactions")
+    .select("group_id")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!existing) return { error: "No se encontró el movimiento." };
+  if (existing.group_id) {
+    return { error: "Los gastos de grupo se editan desde el grupo." };
+  }
+
   const kind = String(formData.get("kind") ?? "expense");
   const amount = Number(formData.get("amount"));
   const categoryId = formData.get("category_id");
