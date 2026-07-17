@@ -5,8 +5,11 @@ import { CategoryDonut, type DonutSlice } from "@/components/CategoryDonut";
 import { MonthlyBars, type MonthDatum } from "@/components/MonthlyBars";
 import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
 import { buildRateMap, toBase, canConvert } from "@/lib/currency";
+import { categoryIcon } from "@/lib/categoryIcons";
+import { formatMoney, formatDate } from "@/lib/format";
 
 const OTHER_COLOR = "#64748b";
+const TOP_EXPENSES = 8;
 const MAX_SLICES = 8;
 
 function pad(n: number) {
@@ -61,7 +64,9 @@ export default async function ReportsPage({
       supabase.from("exchange_rates").select("code, rate_to_base"),
       supabase
         .from("transactions")
-        .select("amount, currency, categories(name, color)")
+        .select(
+          "id, amount, currency, description, occurred_on, categories(name, icon, color)",
+        )
         .eq("kind", "expense")
         .is("group_id", null)
         .gte("occurred_on", monthStart)
@@ -100,6 +105,27 @@ export default async function ReportsPage({
     slices = [...top, { name: "Otros", color: OTHER_COLOR, amount: otrosAmount }];
   }
   const totalExpenses = slices.reduce((s, x) => s + x.amount, 0);
+
+  // ---- Mayores gastos individuales del mes ----
+  const topExpenses = (monthExpenses ?? [])
+    .filter((r) => canConvert(r.currency, base, rateMap))
+    .map((r) => {
+      const cat = r.categories as unknown as {
+        name: string;
+        icon: string | null;
+        color: string | null;
+      } | null;
+      return {
+        id: r.id,
+        label: r.description || cat?.name || "Gasto",
+        icon: categoryIcon(cat?.icon),
+        color: cat?.color ?? OTHER_COLOR,
+        date: r.occurred_on,
+        amount: toBase(Number(r.amount), r.currency, base, rateMap),
+      };
+    })
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, TOP_EXPENSES);
 
   // ---- Barras + tendencia: 6 meses terminando en el seleccionado ----
   const buckets: MonthDatum[] = [];
@@ -169,6 +195,37 @@ export default async function ReportsPage({
           </p>
         )}
       </section>
+
+      {topExpenses.length > 0 && (
+        <section className="flex flex-col gap-3 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
+            Mayores gastos del mes
+          </h2>
+          <ul className="flex flex-col divide-y divide-black/5 dark:divide-white/5">
+            {topExpenses.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 py-2">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base"
+                    style={{ backgroundColor: e.color + "22" }}
+                  >
+                    {e.icon}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm">{e.label}</span>
+                    <span className="block text-xs text-black/50 dark:text-white/50">
+                      {formatDate(e.date)}
+                    </span>
+                  </span>
+                </span>
+                <span className="shrink-0 text-sm font-semibold text-red-600 dark:text-red-400">
+                  {formatMoney(e.amount, base)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">

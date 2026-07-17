@@ -572,6 +572,34 @@ fecha); suficiente para MVP. Historial queda para referencia/reportes.
 
 ---
 
+## 2026-07-17 — Tanda de 10 mejoras (UX + funciones)
+
+**Hecho:**
+1. Recurrencia automática **opcional** (checkbox "Repetir automáticamente"); sin él, la
+   recurrente es solo un atajo. Migración 0011 (frequency/next_run_on nullable).
+2/3. Emoji de categoría en **todos los selects** y en la lista de recurrentes.
+4. **Editar categorías** (nombre/color/emoji) en `/dashboard/categories/[id]`.
+5. **Editar planes de cuotas** (nombre/categoría, `updatePlanInfo`); pagar una cuota la
+   registra en su **fecha de vencimiento** (sirve para cuotas anteriores a usar la app);
+   cuotas vencidas se marcan en ámbar con consejo.
+6. Filtro **Todos/Ingresos/Gastos** en últimos movimientos (`?filter=`).
+7. **Hora** opcional en movimientos (columna `occurred_at`; se muestra en la lista;
+   formateada en zona horaria CR).
+8. Arreglado el layout del botón "Guardar" del tipo de cambio (form en columna).
+10. **Mayores gastos del mes** (lista de gastos individuales) en Reportes.
+
+Migración 0011 aplica: recurrencia opcional + `transactions.occurred_at`.
+**Verificado:** `npm run build` OK.
+
+**#9 (pregunta del usuario):** el tipo de cambio NO es diario; es un único valor por
+moneda que configurás en Ajustes (no histórico por fecha). El formulario solo ofrece
+monedas que ya tengan tasa (base + configuradas), así que no podés registrar en una
+moneda sin tasa. Tasas por-día/históricas = mejora futura.
+
+**Recordatorio al usuario:** aplicar `0011_optional_recurrence_and_time.sql` en Supabase.
+
+---
+
 ## 2026-07-17 — Mejoras de UX + íconos de categorías
 
 **Hecho:**

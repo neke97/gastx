@@ -1,18 +1,24 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { payInstallment, unpayInstallment } from "../actions";
+import { payInstallment, unpayInstallment, updatePlanInfo } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
+import { categoryIcon } from "@/lib/categoryIcons";
 
 type Plan = {
   id: string;
   name: string;
   total_amount: number;
   currency: string;
+  category_id: string | null;
   installments_count: number;
   is_completed: boolean;
 };
+type Cat = { id: string; name: string; kind: "expense" | "income"; icon: string | null };
+
+const selectClasses =
+  "rounded-lg border border-black/15 bg-white px-3 py-2.5 text-sm text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white";
 type Payment = {
   id: string;
   number: number;
@@ -34,22 +40,35 @@ export default async function PlanDetailPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: plan }, { data: payments }] = await Promise.all([
-    supabase
-      .from("installment_plans")
-      .select("id, name, total_amount, currency, installments_count, is_completed")
-      .eq("id", id)
-      .maybeSingle(),
-    supabase
-      .from("installment_payments")
-      .select("id, number, due_date, amount, paid_on")
-      .eq("installment_plan_id", id)
-      .order("number"),
-  ]);
+  const [{ data: plan }, { data: payments }, { data: categories }] =
+    await Promise.all([
+      supabase
+        .from("installment_plans")
+        .select(
+          "id, name, total_amount, currency, category_id, installments_count, is_completed",
+        )
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("installment_payments")
+        .select("id, number, due_date, amount, paid_on")
+        .eq("installment_plan_id", id)
+        .order("number"),
+      supabase
+        .from("categories")
+        .select("id, name, kind, icon")
+        .eq("kind", "expense")
+        .eq("is_archived", false)
+        .order("name"),
+    ]);
 
   if (!plan) notFound();
   const p = plan as Plan;
   const list = (payments ?? []) as Payment[];
+  const cats = (categories ?? []) as Cat[];
+  const todayStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Costa_Rica",
+  }).format(new Date()); // YYYY-MM-DD
 
   const paidAmount = list
     .filter((x) => x.paid_on)
@@ -93,8 +112,57 @@ export default async function PlanDetailPage({
         </p>
       </section>
 
+      {/* Editar el plan (nombre y categoría) */}
+      <details className="rounded-2xl border border-black/10 p-4 dark:border-white/10">
+        <summary className="cursor-pointer text-sm font-semibold text-black/70 dark:text-white/70">
+          Editar plan
+        </summary>
+        <form action={updatePlanInfo} className="mt-3 flex flex-col gap-3">
+          <input type="hidden" name="plan_id" value={p.id} />
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">Nombre</span>
+            <input
+              type="text"
+              name="name"
+              required
+              defaultValue={p.name}
+              className="rounded-lg border border-black/15 bg-transparent px-3 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-white/15"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">Categoría</span>
+            <select
+              name="category_id"
+              defaultValue={p.category_id ?? ""}
+              className={selectClasses}
+            >
+              <option value="">Sin categoría</option>
+              {cats.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {categoryIcon(c.icon)} {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <SubmitButton
+            pendingLabel="Guardando…"
+            className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+          >
+            Guardar cambios
+          </SubmitButton>
+        </form>
+      </details>
+
+      <p className="text-xs text-black/50 dark:text-white/50">
+        Consejo: si una cuota ya venció y la pagaste (incluso antes de usar la
+        app), tocá <span className="font-medium">Pagar</span>: se registra en su
+        fecha de vencimiento.
+      </p>
+
       <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
-        {list.map((c) => (
+        {list.map((c) => {
+          const overdue = !c.paid_on && c.due_date < todayStr;
+          return (
           <li
             key={c.id}
             className="flex items-center justify-between gap-3 px-4 py-3"
@@ -104,10 +172,18 @@ export default async function PlanDetailPage({
                 Cuota {c.number}/{p.installments_count} ·{" "}
                 {formatMoney(c.amount, p.currency)}
               </p>
-              <p className="text-xs text-black/50 dark:text-white/50">
+              <p
+                className={`text-xs ${
+                  overdue
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-black/50 dark:text-white/50"
+                }`}
+              >
                 {c.paid_on
                   ? `Pagada el ${formatDate(c.paid_on)}`
-                  : `Vence ${formatDate(c.due_date)}`}
+                  : overdue
+                    ? `Vencida el ${formatDate(c.due_date)}`
+                    : `Vence ${formatDate(c.due_date)}`}
               </p>
             </div>
             {c.paid_on ? (
@@ -132,7 +208,8 @@ export default async function PlanDetailPage({
               </form>
             )}
           </li>
-        ))}
+          );
+        })}
       </ul>
     </main>
   );

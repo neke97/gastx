@@ -115,6 +115,28 @@ export async function addPlan(
   return { ok: true };
 }
 
+/** Edita datos del plan (nombre y categoría). No regenera las cuotas. */
+export async function updatePlanInfo(formData: FormData) {
+  const id = String(formData.get("plan_id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const categoryId = formData.get("category_id");
+  if (!id || !name) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("installment_plans")
+    .update({ name, category_id: categoryId ? String(categoryId) : null })
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  revalidate(id);
+}
+
 /** Marca una cuota como pagada y la registra como gasto. */
 export async function payInstallment(formData: FormData) {
   const paymentId = String(formData.get("payment_id") ?? "");
@@ -129,7 +151,7 @@ export async function payInstallment(formData: FormData) {
   const { data: payment } = await supabase
     .from("installment_payments")
     .select(
-      "id, number, amount, paid_on, installment_plan_id, installment_plans(name, installments_count, category_id, currency)",
+      "id, number, amount, paid_on, due_date, installment_plan_id, installment_plans(name, installments_count, category_id, currency)",
     )
     .eq("id", paymentId)
     .maybeSingle();
@@ -152,7 +174,9 @@ export async function payInstallment(formData: FormData) {
       currency: plan.currency,
       category_id: plan.category_id,
       description: `${plan.name} — cuota ${payment.number}/${plan.installments_count}`,
-      occurred_on: todayYMD(),
+      // Se registra en la fecha de vencimiento de la cuota (así una cuota
+      // anterior queda registrada en su fecha real, aunque la marques hoy).
+      occurred_on: payment.due_date ?? todayYMD(),
       installment_plan_id: payment.installment_plan_id,
     })
     .select("id")
