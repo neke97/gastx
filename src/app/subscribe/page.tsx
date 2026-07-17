@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { hasAccess, ACCESS_COLUMNS } from "@/lib/access";
 import { PromoCodeForm } from "@/components/PromoCodeForm";
+import { PayPalSubscribeButtons } from "@/components/PayPalSubscribeButtons";
 import { SubmitButton } from "@/components/SubmitButton";
 import { signOut } from "@/app/(app)/dashboard/actions";
 
@@ -20,10 +22,15 @@ export default async function SubscribePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("access_active")
+    .select(ACCESS_COLUMNS)
     .eq("id", user.id)
     .maybeSingle();
-  if (profile?.access_active) redirect("/dashboard");
+  if (hasAccess(profile)) redirect("/dashboard");
+
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const monthlyPlan = process.env.NEXT_PUBLIC_PAYPAL_PLAN_MONTHLY;
+  const annualPlan = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ANNUAL;
+  const paypalReady = Boolean(clientId && monthlyPlan && annualPlan);
 
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-12">
@@ -38,13 +45,10 @@ export default async function SubscribePage() {
         </p>
       </header>
 
-      {/* Plan (suscripción — pagos próximamente) */}
+      {/* Plan + suscripción */}
       <section className="flex flex-col gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.04] p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Plan GastX</h2>
-          <span className="text-sm text-black/60 dark:text-white/60">
-            Suscripción
-          </span>
+          <h2 className="font-semibold">Plan GastX Pro</h2>
         </div>
         <ul className="flex flex-col gap-1.5 text-sm">
           {PLAN_FEATURES.map((f) => (
@@ -54,16 +58,19 @@ export default async function SubscribePage() {
             </li>
           ))}
         </ul>
-        <button
-          type="button"
-          disabled
-          className="cursor-not-allowed rounded-lg bg-emerald-600/50 px-4 py-2.5 font-medium text-white"
-        >
-          Suscribirse (próximamente)
-        </button>
-        <p className="text-center text-xs text-black/50 dark:text-white/50">
-          Los pagos aún no están habilitados.
-        </p>
+
+        {paypalReady ? (
+          <PayPalSubscribeButtons
+            clientId={clientId!}
+            monthlyPlan={monthlyPlan!}
+            annualPlan={annualPlan!}
+          />
+        ) : (
+          <div className="rounded-lg border border-black/10 bg-black/[0.02] px-4 py-3 text-center text-sm text-black/60 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/60">
+            Los pagos con PayPal se están configurando. Mientras tanto, usá un
+            código promocional abajo.
+          </div>
+        )}
       </section>
 
       {/* Código promocional */}

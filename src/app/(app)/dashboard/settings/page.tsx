@@ -3,7 +3,21 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SubmitButton } from "@/components/SubmitButton";
 import { COMMON_CURRENCIES } from "@/lib/currency";
-import { updateBaseCurrency, upsertRate, deleteRate } from "./actions";
+import { formatDate } from "@/lib/format";
+import { PLANS, type PlanInterval } from "@/lib/plans";
+import {
+  updateBaseCurrency,
+  upsertRate,
+  deleteRate,
+  cancelMySubscription,
+} from "./actions";
+
+const SUB_STATUS_LABEL: Record<string, string> = {
+  active: "Activa",
+  cancelled: "Cancelada (activa hasta el fin del período)",
+  suspended: "Suspendida",
+  expired: "Expirada",
+};
 
 type Rate = { id: string; code: string; rate_to_base: number };
 
@@ -20,7 +34,13 @@ export default async function SettingsPage() {
   if (!user) redirect("/login");
 
   const [{ data: profile }, { data: rates }] = await Promise.all([
-    supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select(
+        "default_currency, plan, plan_interval, subscription_status, current_period_end",
+      )
+      .eq("id", user.id)
+      .maybeSingle(),
     supabase
       .from("exchange_rates")
       .select("id, code, rate_to_base")
@@ -29,6 +49,12 @@ export default async function SettingsPage() {
 
   const base = profile?.default_currency ?? "CRC";
   const rateList = (rates ?? []) as Rate[];
+
+  const plan = profile?.plan ?? "free";
+  const subStatus = profile?.subscription_status as string | null;
+  const planInterval = profile?.plan_interval as PlanInterval | null;
+  const periodEnd = profile?.current_period_end as string | null;
+  const isSubscriber = plan === "pro" && Boolean(subStatus);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -41,6 +67,43 @@ export default async function SettingsPage() {
         </Link>
         <h1 className="text-xl font-bold tracking-tight">Ajustes</h1>
       </header>
+
+      {/* Mi suscripción */}
+      {isSubscriber && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
+            Mi suscripción
+          </h2>
+          <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-4 dark:border-white/10">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                GastX Pro
+                {planInterval ? ` · ${PLANS[planInterval].label}` : ""}
+              </span>
+              <span className="text-black/60 dark:text-white/60">
+                {SUB_STATUS_LABEL[subStatus ?? ""] ?? subStatus}
+              </span>
+            </div>
+            {periodEnd && (
+              <p className="text-xs text-black/50 dark:text-white/50">
+                {subStatus === "active"
+                  ? `Próximo cobro: ${formatDate(periodEnd)}`
+                  : `Acceso hasta: ${formatDate(periodEnd)}`}
+              </p>
+            )}
+            {subStatus === "active" && (
+              <form action={cancelMySubscription}>
+                <SubmitButton
+                  pendingLabel="Cancelando…"
+                  className="mt-1 rounded-lg border border-red-500/40 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
+                >
+                  Cancelar suscripción
+                </SubmitButton>
+              </form>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Moneda base */}
       <section className="flex flex-col gap-2">

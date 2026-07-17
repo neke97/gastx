@@ -5,6 +5,48 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-17 — Pagos reales con PayPal (suscripción mensual/anual)
+
+**Hecho:**
+- Integración de **suscripciones PayPal** (proveedor elegido: solo PayPal, ya que
+  Stripe no habilita comercios en Costa Rica). Se mantiene el código promocional.
+- **Planes:** Mensual **₡500** (~$0.95) y Anual **₡5.000** (~$9.50). PayPal no
+  cobra en CRC, así que se factura en USD y se muestra el equivalente en colones.
+- Migración `0014`: `profiles` gana `paypal_subscription_id`, `subscription_status`,
+  `plan_interval`, `current_period_end`.
+- Lógica de acceso central (`src/lib/access.ts` → `hasAccess`): acceso si
+  `access_active` y (sin `current_period_end` = promo/legacy/de por vida, o
+  `current_period_end` en el futuro = suscripción vigente). Gate del layout y la
+  página `/subscribe` la usan.
+- `src/lib/paypal.ts`: token OAuth, `getSubscription`, `cancelSubscription`,
+  `verifyWebhookSignature`.
+- API: `POST /api/paypal/activate` (verifica la suscripción en servidor y activa
+  al usuario) y `POST /api/paypal/webhook` (firma verificada; maneja ACTIVATED,
+  PAYMENT.SALE.COMPLETED = renovación, CANCELLED, SUSPENDED, EXPIRED/DENIED).
+- UI: botones PayPal en `/subscribe` (`PayPalSubscribeButtons`, selector mensual/
+  anual) usando `@paypal/react-paypal-js`. Sección "Mi suscripción" en Ajustes con
+  estado, próximo cobro y **Cancelar** (el acceso sigue hasta el fin del período).
+- Script `scripts/paypal-setup-plans.mjs` para crear producto + planes y obtener
+  los IDs. `.env.example` documenta todas las variables PayPal.
+
+**Pendiente para el usuario (config PayPal, en orden):**
+1. Crear app en https://developer.paypal.com (Apps & Credentials). Copiar
+   **Client ID** y **Secret**. Empezar en **Sandbox** para probar.
+2. Poner en `.env.local` (y luego en Vercel): `PAYPAL_ENV`, `PAYPAL_CLIENT_ID`,
+   `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID`.
+3. Correr `node scripts/paypal-setup-plans.mjs` → copiar
+   `NEXT_PUBLIC_PAYPAL_PLAN_MONTHLY` y `NEXT_PUBLIC_PAYPAL_PLAN_ANNUAL`.
+4. Crear un **Webhook** en el dashboard apuntando a
+   `https://gastx.vercel.app/api/paypal/webhook`, suscrito a los eventos de
+   `BILLING.SUBSCRIPTION.*` y `PAYMENT.SALE.*`. Copiar su ID a `PAYPAL_WEBHOOK_ID`.
+5. Aplicar migración `supabase/migrations/0014_paypal_subscriptions.sql`.
+6. Para producción: cambiar `PAYPAL_ENV=live` y usar credenciales/plan IDs live.
+
+**Nota:** con montos tan bajos (₡500), la comisión fija de PayPal por transacción
+se lleva buena parte. Considerá si el anual (menos cobros) conviene destacarlo.
+
+---
+
 ## 2026-07-17 — Navegación de grupos, chart de mayores gastos y suscripciones
 
 **Hecho:**
