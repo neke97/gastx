@@ -66,12 +66,14 @@ export default async function DashboardPage() {
       .select(
         "id, kind, amount, description, occurred_on, categories(name), transaction_splits(amount_resolved, people(name))",
       )
+      .is("group_id", null)
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(30),
     supabase
       .from("transactions")
       .select("kind, amount")
+      .is("group_id", null)
       .gte("occurred_on", monthStart)
       .lt("occurred_on", nextMonthStart),
   ]);

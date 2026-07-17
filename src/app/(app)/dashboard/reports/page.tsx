@@ -59,11 +59,13 @@ export default async function ReportsPage({
       .from("transactions")
       .select("amount, categories(name, color)")
       .eq("kind", "expense")
+      .is("group_id", null)
       .gte("occurred_on", monthStart)
       .lt("occurred_on", nextMonthStart),
     supabase
       .from("transactions")
       .select("kind, amount, occurred_on")
+      .is("group_id", null)
       .gte("occurred_on", windowStart)
       .lt("occurred_on", nextMonthStart),
   ]);

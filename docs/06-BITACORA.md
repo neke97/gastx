@@ -59,6 +59,28 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Fase 7 (parte 2): gastos compartidos y saldos
+
+**Hecho:**
+- Migración `supabase/migrations/0007_group_expenses.sql`: `transactions.group_id`,
+  `transaction_splits.member_user_id` (splits por miembro real; `person_id` ahora nullable
+  con check "uno u otro"), y políticas RLS de SELECT para que los miembros vean las
+  transacciones y splits del grupo. **Falta aplicarla en Supabase.**
+- `addGroupExpense` (paga vos, divide en partes iguales entre miembros; última cuota
+  ajusta redondeo) y `deleteGroupExpense` (solo el pagador).
+- `GroupExpenseForm` (cliente). Detalle del grupo ahora muestra: nuevo gasto, **saldos**
+  (pagado − parte tocada, por miembro → "le deben"/"debe"/"al día") y lista de gastos.
+- Dashboard y Reportes ahora filtran `group_id is null` (los gastos de grupo son un ledger
+  aparte, no se mezclan con lo personal).
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0007_group_expenses.sql` en Supabase.
+
+**Fase 7 (grupos) completa.** Pendientes futuros: división de grupo por montos custom (hoy
+partes iguales), envío real de email de invitación, multi-moneda y licencias/suscripción.
+
+---
+
 ## 2026-07-17 — Fase 7 (parte 1): grupos compartidos reales
 
 **Hecho:**

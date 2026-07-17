@@ -66,10 +66,10 @@ futuras sin acordarlo.
 **Fase 6 completa ✅**
 
 ## Fase 7 — Escalar a producto (futuro)
-- [~] Grupos compartidos reales (migración 0006: `groups`, `group_members`, `group_invites`
-      + RLS con funciones security definer). Hecho: crear grupo, invitar por correo,
-      aceptar/rechazar, ver/quitar miembros, salir/borrar. **Falta:** gastos compartidos
-      dentro del grupo (parte 2).
+- [x] Grupos compartidos reales (migración 0006 + 0007). Crear/invitar/aceptar/miembros
+      (parte 1) + **gastos del grupo** divididos en partes iguales entre miembros reales
+      con **saldos** (quién debe/le deben) (parte 2). Gastos de grupo separados del ledger
+      personal (dashboard/reportes filtran `group_id is null`).
 - [ ] Multi-moneda con tasas de cambio.
 - [ ] Licencias / suscripción (`plans`, `subscriptions`), planes free vs premium.
 
