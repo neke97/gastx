@@ -24,7 +24,15 @@ const selectClasses =
 const inputClasses =
   "rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15";
 
-export function InstallmentForm({ categories }: { categories: Category[] }) {
+export function InstallmentForm({
+  categories,
+  baseCurrency = "CRC",
+  currencies = ["CRC"],
+}: {
+  categories: Category[];
+  baseCurrency?: string;
+  currencies?: string[];
+}) {
   const [total, setTotal] = useState("");
   const [count, setCount] = useState("");
   const [state, formAction, pending] = useActionState<PlanFormState, FormData>(
@@ -67,7 +75,7 @@ export function InstallmentForm({ categories }: { categories: Category[] }) {
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Total (₡)</span>
+          <span className="font-medium">Total</span>
           <input
             type="number"
             name="total_amount"
@@ -94,6 +102,21 @@ export function InstallmentForm({ categories }: { categories: Category[] }) {
           />
         </label>
       </div>
+
+      {currencies.length > 1 ? (
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Moneda</span>
+          <select name="currency" defaultValue={baseCurrency} className={selectClasses}>
+            {currencies.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <input type="hidden" name="currency" value={baseCurrency} />
+      )}
 
       {perInstallment > 0 && (
         <p className="text-sm text-black/60 dark:text-white/60">

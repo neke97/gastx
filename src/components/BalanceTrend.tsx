@@ -8,7 +8,13 @@ const LINE = "#0d9488"; // teal (coherente con los otros gráficos)
  * Línea de tendencia del balance neto por mes (una sola serie, sin leyenda:
  * el título la nombra). Escala en SVG con viewBox para adaptarse al ancho.
  */
-export function BalanceTrend({ data }: { data: TrendPoint[] }) {
+export function BalanceTrend({
+  data,
+  currency = "CRC",
+}: {
+  data: TrendPoint[];
+  currency?: string;
+}) {
   const H = 100;
   const W = 100;
   const values = data.map((d) => d.value);
@@ -65,7 +71,7 @@ export function BalanceTrend({ data }: { data: TrendPoint[] }) {
               fill={LINE}
               vectorEffect="non-scaling-stroke"
             >
-              <title>{`${d.label}: ${formatMoney(d.value)}`}</title>
+              <title>{`${d.label}: ${formatMoney(d.value, currency)}`}</title>
             </circle>
           ))}
         </svg>

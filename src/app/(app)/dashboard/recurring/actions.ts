@@ -43,6 +43,7 @@ function parseForm(formData: FormData):
       kind: "expense" | "income";
       name: string;
       amount: number;
+      currency: string;
       categoryId: string | null;
       frequency: (typeof FREQS)[number];
       interval: number;
@@ -51,6 +52,7 @@ function parseForm(formData: FormData):
   const kind = String(formData.get("kind") ?? "expense");
   const name = String(formData.get("name") ?? "").trim();
   const amount = Number(formData.get("amount"));
+  const currency = String(formData.get("currency") ?? "").trim() || "CRC";
   const categoryId = formData.get("category_id");
   const frequency = String(formData.get("frequency") ?? "monthly");
   const interval = Number(formData.get("interval") ?? 1);
@@ -70,6 +72,7 @@ function parseForm(formData: FormData):
     kind,
     name,
     amount,
+    currency,
     categoryId: categoryId ? String(categoryId) : null,
     frequency: frequency as (typeof FREQS)[number],
     interval,
@@ -98,6 +101,7 @@ export async function addRecurring(
       kind: p.kind,
       name: p.name,
       amount: p.amount,
+      currency: p.currency,
       category_id: p.categoryId,
       frequency: p.frequency,
       interval: p.interval,
@@ -151,6 +155,7 @@ export async function updateRecurring(
       kind: p.kind,
       name: p.name,
       amount: p.amount,
+      currency: p.currency,
       category_id: p.categoryId,
       frequency: p.frequency,
       interval: p.interval,

@@ -15,6 +15,7 @@ type Initial = {
   kind: "expense" | "income";
   name: string;
   amount: number;
+  currency?: string;
   category_id: string | null;
   frequency: "daily" | "weekly" | "monthly" | "yearly";
   interval: number;
@@ -43,9 +44,13 @@ const inputClasses =
 export function RecurringForm({
   categories,
   initial,
+  baseCurrency = "CRC",
+  currencies = ["CRC"],
 }: {
   categories: Category[];
   initial?: Initial;
+  baseCurrency?: string;
+  currencies?: string[];
 }) {
   const isEdit = Boolean(initial);
   const [kind, setKind] = useState<"expense" | "income">(
@@ -106,20 +111,40 @@ export function RecurringForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Monto (₡)</span>
-        <input
-          type="number"
-          name="amount"
-          required
-          min="0"
-          step="0.01"
-          inputMode="decimal"
-          placeholder="0"
-          defaultValue={initial?.amount ?? ""}
-          className={inputClasses}
-        />
-      </label>
+      <div className="flex gap-2">
+        <label className="flex flex-1 flex-col gap-1 text-sm">
+          <span className="font-medium">Monto</span>
+          <input
+            type="number"
+            name="amount"
+            required
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            placeholder="0"
+            defaultValue={initial?.amount ?? ""}
+            className={inputClasses}
+          />
+        </label>
+        {currencies.length > 1 ? (
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">Moneda</span>
+            <select
+              name="currency"
+              defaultValue={initial?.currency ?? baseCurrency}
+              className={selectClasses}
+            >
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <input type="hidden" name="currency" value={baseCurrency} />
+        )}
+      </div>
 
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Categoría</span>

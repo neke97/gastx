@@ -12,6 +12,7 @@ type Shortcut = {
   id: string;
   name: string;
   amount: number;
+  currency: string;
   kind: "expense" | "income";
 };
 
@@ -64,7 +65,7 @@ export default async function DashboardPage() {
     supabase.from("people").select("id, name").order("name"),
     supabase
       .from("recurring_templates")
-      .select("id, name, amount, kind")
+      .select("id, name, amount, currency, kind")
       .eq("is_active", true)
       .order("name"),
     supabase
@@ -166,7 +167,7 @@ export default async function DashboardPage() {
                   }`}
                 >
                   {s.name} · {s.kind === "income" ? "+" : "−"}
-                  {formatMoney(s.amount)}
+                  {formatMoney(s.amount, s.currency)}
                 </SubmitButton>
               </form>
             ))}

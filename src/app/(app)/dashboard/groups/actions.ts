@@ -140,6 +140,14 @@ export async function addGroupExpense(
   const ids = (members ?? []).map((m) => m.user_id);
   if (ids.length === 0) return { error: "El grupo no tiene miembros." };
 
+  // Moneda del grupo.
+  const { data: grp } = await supabase
+    .from("groups")
+    .select("currency")
+    .eq("id", groupId)
+    .maybeSingle();
+  const currency = grp?.currency ?? "CRC";
+
   // Crear la transacción (pagador = vos).
   const { data: tx, error: txErr } = await supabase
     .from("transactions")
@@ -147,6 +155,7 @@ export async function addGroupExpense(
       user_id: user.id,
       kind: "expense",
       amount,
+      currency,
       group_id: groupId,
       description: description || null,
       occurred_on: occurredOn,

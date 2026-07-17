@@ -9,9 +9,11 @@ export type DonutSlice = { name: string; color: string; amount: number };
 export function CategoryDonut({
   slices,
   total,
+  currency = "CRC",
 }: {
   slices: DonutSlice[];
   total: number;
+  currency?: string;
 }) {
   const size = 176;
   const stroke = 26;
@@ -77,7 +79,7 @@ export function CategoryDonut({
           textAnchor="middle"
           className="fill-black text-sm font-bold dark:fill-white"
         >
-          {formatMoney(total)}
+          {formatMoney(total, currency)}
         </text>
       </svg>
 
@@ -92,7 +94,7 @@ export function CategoryDonut({
               <span className="truncate">{s.name}</span>
             </span>
             <span className="shrink-0 text-black/60 dark:text-white/60">
-              {formatMoney(s.amount)}{" "}
+              {formatMoney(s.amount, currency)}{" "}
               <span className="text-xs text-black/40 dark:text-white/40">
                 ({Math.round((s.amount / total) * 100)}%)
               </span>

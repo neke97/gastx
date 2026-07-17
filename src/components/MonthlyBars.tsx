@@ -13,7 +13,13 @@ const EXPENSE = "#e11d48"; // rosa — validado CVD
  * Ingresos vs gastos por mes (barras agrupadas). Dos series → leyenda siempre
  * presente; abajo una tabla con los valores exactos (identidad no solo por color).
  */
-export function MonthlyBars({ data }: { data: MonthDatum[] }) {
+export function MonthlyBars({
+  data,
+  currency = "CRC",
+}: {
+  data: MonthDatum[];
+  currency?: string;
+}) {
   const max = Math.max(1, ...data.flatMap((d) => [d.income, d.expense]));
   const chartH = 132;
 
@@ -49,7 +55,7 @@ export function MonthlyBars({ data }: { data: MonthDatum[] }) {
                   height: `${(d.income / max) * 100}%`,
                   backgroundColor: INCOME,
                 }}
-                title={`Ingresos: ${formatMoney(d.income)}`}
+                title={`Ingresos: ${formatMoney(d.income, currency)}`}
               />
               <div
                 className="w-1/2 max-w-6 rounded-t"
@@ -57,7 +63,7 @@ export function MonthlyBars({ data }: { data: MonthDatum[] }) {
                   height: `${(d.expense / max) * 100}%`,
                   backgroundColor: EXPENSE,
                 }}
-                title={`Gastos: ${formatMoney(d.expense)}`}
+                title={`Gastos: ${formatMoney(d.expense, currency)}`}
               />
             </div>
             <span className="text-xs text-black/50 dark:text-white/50">
@@ -84,8 +90,8 @@ export function MonthlyBars({ data }: { data: MonthDatum[] }) {
                 className="border-t border-black/5 dark:border-white/5"
               >
                 <td className="py-1 pr-2">{d.label}</td>
-                <td className="py-1 pr-2 text-right">{formatMoney(d.income)}</td>
-                <td className="py-1 pr-2 text-right">{formatMoney(d.expense)}</td>
+                <td className="py-1 pr-2 text-right">{formatMoney(d.income, currency)}</td>
+                <td className="py-1 pr-2 text-right">{formatMoney(d.expense, currency)}</td>
                 <td
                   className={`py-1 text-right font-medium ${
                     d.income - d.expense >= 0
@@ -93,7 +99,7 @@ export function MonthlyBars({ data }: { data: MonthDatum[] }) {
                       : "text-red-600 dark:text-red-400"
                   }`}
                 >
-                  {formatMoney(d.income - d.expense)}
+                  {formatMoney(d.income - d.expense, currency)}
                 </td>
               </tr>
             ))}

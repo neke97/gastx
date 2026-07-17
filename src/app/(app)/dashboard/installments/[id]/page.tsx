@@ -9,6 +9,7 @@ type Plan = {
   id: string;
   name: string;
   total_amount: number;
+  currency: string;
   installments_count: number;
   is_completed: boolean;
 };
@@ -36,7 +37,7 @@ export default async function PlanDetailPage({
   const [{ data: plan }, { data: payments }] = await Promise.all([
     supabase
       .from("installment_plans")
-      .select("id, name, total_amount, installments_count, is_completed")
+      .select("id, name, total_amount, currency, installments_count, is_completed")
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -73,13 +74,13 @@ export default async function PlanDetailPage({
           <div>
             <p className="text-black/50 dark:text-white/50">Falta pagar</p>
             <p className="text-2xl font-bold tracking-tight">
-              {formatMoney(remaining)}
+              {formatMoney(remaining, p.currency)}
             </p>
           </div>
           <div>
             <p className="text-black/50 dark:text-white/50">Total</p>
             <p className="text-2xl font-bold tracking-tight">
-              {formatMoney(p.total_amount)}
+              {formatMoney(p.total_amount, p.currency)}
             </p>
           </div>
         </div>
@@ -100,7 +101,8 @@ export default async function PlanDetailPage({
           >
             <div className="min-w-0">
               <p className="text-sm font-medium">
-                Cuota {c.number}/{p.installments_count} · {formatMoney(c.amount)}
+                Cuota {c.number}/{p.installments_count} ·{" "}
+                {formatMoney(c.amount, p.currency)}
               </p>
               <p className="text-xs text-black/50 dark:text-white/50">
                 {c.paid_on

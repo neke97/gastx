@@ -59,6 +59,24 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Multi-moneda: consistencia total
+
+**Hecho (cerrando las notas pendientes):**
+- **Gráficos** (`CategoryDonut`, `MonthlyBars`, `BalanceTrend`): prop `currency`; Reportes
+  les pasa la moneda base → formatean correcto aunque la base no sea CRC.
+- **Recurrentes:** `RecurringForm` con selector de moneda; `addRecurring`/`updateRecurring`
+  guardan `currency`; lista/edición/atajos y quick-add formatean en la moneda de la plantilla.
+- **Cuotas:** `InstallmentForm` con selector de moneda; `addPlan` guarda `currency`;
+  lista y detalle formatean en la moneda del plan (los pagos ya heredaban plan.currency).
+- **Grupos:** migración `0009_group_currency.sql` — `groups.currency` (se fija a la base del
+  creador vía `create_group`); `addGroupExpense` usa la moneda del grupo; el detalle
+  (saldos, gastos, form) formatea en la moneda del grupo.
+- **Verificado:** `npm run build` OK.
+
+**Recordatorio al usuario:** aplicar `0009_group_currency.sql` en Supabase.
+
+---
+
 ## 2026-07-17 — Multi-moneda
 
 **Hecho:**

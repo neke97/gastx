@@ -10,12 +10,14 @@ import {
 } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
+import { buildRateMap, availableCurrencies } from "@/lib/currency";
 
 type Template = {
   id: string;
   kind: "expense" | "income";
   name: string;
   amount: number;
+  currency: string;
   frequency: "daily" | "weekly" | "monthly" | "yearly";
   interval: number;
   next_run_on: string;
@@ -41,18 +43,26 @@ export default async function RecurringPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: categories }, { data: templates }] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, name, kind")
-      .eq("is_archived", false)
-      .order("name"),
-    supabase
-      .from("recurring_templates")
-      .select("id, kind, name, amount, frequency, interval, next_run_on, is_active")
-      .order("is_active", { ascending: false })
-      .order("next_run_on"),
-  ]);
+  const [{ data: categories }, { data: templates }, { data: profile }, { data: rates }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, kind")
+        .eq("is_archived", false)
+        .order("name"),
+      supabase
+        .from("recurring_templates")
+        .select(
+          "id, kind, name, amount, currency, frequency, interval, next_run_on, is_active",
+        )
+        .order("is_active", { ascending: false })
+        .order("next_run_on"),
+      supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
+      supabase.from("exchange_rates").select("code, rate_to_base"),
+    ]);
+
+  const base = profile?.default_currency ?? "CRC";
+  const currencies = availableCurrencies(base, buildRateMap(rates));
 
   const list = (templates ?? []) as Template[];
 
@@ -79,7 +89,11 @@ export default async function RecurringPage() {
         para sumarlo hoy. La generación automática (según la frecuencia) es opcional.
       </p>
 
-      <RecurringForm categories={categories ?? []} />
+      <RecurringForm
+        categories={categories ?? []}
+        baseCurrency={base}
+        currencies={currencies}
+      />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
@@ -106,7 +120,7 @@ export default async function RecurringPage() {
                       }
                     >
                       {t.kind === "income" ? "+" : "−"}
-                      {formatMoney(t.amount)}
+                      {formatMoney(t.amount, t.currency)}
                     </span>{" "}
                     · {t.name}
                   </p>

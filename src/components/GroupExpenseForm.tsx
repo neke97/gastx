@@ -20,9 +20,11 @@ const inputClasses =
 export function GroupExpenseForm({
   groupId,
   memberCount,
+  currency = "CRC",
 }: {
   groupId: string;
   memberCount: number;
+  currency?: string;
 }) {
   const [state, action, pending] = useActionState<GroupFormState, FormData>(
     addGroupExpense,
@@ -43,7 +45,7 @@ export function GroupExpenseForm({
       <input type="hidden" name="group_id" value={groupId} />
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Monto del gasto (₡)</span>
+        <span className="font-medium">Monto del gasto ({currency})</span>
         <input
           type="number"
           name="amount"

@@ -5,11 +5,13 @@ import { InstallmentForm } from "@/components/InstallmentForm";
 import { deletePlan } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney } from "@/lib/format";
+import { buildRateMap, availableCurrencies } from "@/lib/currency";
 
 type Plan = {
   id: string;
   name: string;
   total_amount: number;
+  currency: string;
   installments_count: number;
   is_completed: boolean;
   installment_payments: { amount: number; paid_on: string | null }[];
@@ -22,22 +24,27 @@ export default async function InstallmentsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: categories }, { data: plans }] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, name, kind")
-      .eq("is_archived", false)
-      .order("name"),
-    supabase
-      .from("installment_plans")
-      .select(
-        "id, name, total_amount, installments_count, is_completed, installment_payments(amount, paid_on)",
-      )
-      .order("is_completed")
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: categories }, { data: plans }, { data: profile }, { data: rates }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, kind")
+        .eq("is_archived", false)
+        .order("name"),
+      supabase
+        .from("installment_plans")
+        .select(
+          "id, name, total_amount, currency, installments_count, is_completed, installment_payments(amount, paid_on)",
+        )
+        .order("is_completed")
+        .order("created_at", { ascending: false }),
+      supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
+      supabase.from("exchange_rates").select("code, rate_to_base"),
+    ]);
 
   const list = (plans ?? []) as Plan[];
+  const base = profile?.default_currency ?? "CRC";
+  const currencies = availableCurrencies(base, buildRateMap(rates));
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -51,7 +58,11 @@ export default async function InstallmentsPage() {
         <h1 className="text-xl font-bold tracking-tight">Cuotas</h1>
       </header>
 
-      <InstallmentForm categories={categories ?? []} />
+      <InstallmentForm
+        categories={categories ?? []}
+        baseCurrency={base}
+        currencies={currencies}
+      />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
@@ -90,7 +101,8 @@ export default async function InstallmentsPage() {
                       </p>
                       <p className="text-xs text-black/50 dark:text-white/50">
                         {paidCount}/{p.installments_count} cuotas ·{" "}
-                        {formatMoney(paidAmount)} de {formatMoney(p.total_amount)}
+                        {formatMoney(paidAmount, p.currency)} de{" "}
+                        {formatMoney(p.total_amount, p.currency)}
                       </p>
                     </Link>
                     <form action={deletePlan}>

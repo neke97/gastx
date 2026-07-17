@@ -70,9 +70,9 @@ futuras sin acordarlo.
       (parte 1) + **gastos del grupo** divididos en partes iguales entre miembros reales
       con **saldos** (quién debe/le deben) (parte 2). Gastos de grupo separados del ledger
       personal (dashboard/reportes filtran `group_id is null`).
-- [x] Multi-moneda con tasas de cambio (migración 0008 `exchange_rates`; Ajustes para
-      moneda base + tasas; selector de moneda por movimiento; totales/reportes convertidos
-      a base). Pendiente: multi-moneda en grupos/recurrentes/cuotas y formato de charts en base ≠ CRC.
+- [x] Multi-moneda completa (migración 0008 `exchange_rates` + 0009 `groups.currency`):
+      Ajustes (moneda base + tasas); selector de moneda en movimientos, recurrentes y cuotas;
+      grupos con moneda propia; totales/reportes convertidos a base; charts formatean en base.
 - [ ] Licencias / suscripción (`plans`, `subscriptions`), planes free vs premium.
 
 ---

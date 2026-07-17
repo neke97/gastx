@@ -51,6 +51,7 @@ export async function addPlan(
   const categoryId = formData.get("category_id");
   const startDate = String(formData.get("start_date") ?? "").trim();
   const frequency = String(formData.get("frequency") ?? "monthly");
+  const currency = String(formData.get("currency") ?? "").trim() || "CRC";
 
   if (!name) return { error: "Escribí un nombre." };
   if (!Number.isFinite(total) || total <= 0)
@@ -71,6 +72,7 @@ export async function addPlan(
       total_amount: total,
       installments_count: count,
       installment_amount: perInstallment,
+      currency,
       category_id: categoryId ? String(categoryId) : null,
       start_date: startDate,
       frequency,

@@ -160,7 +160,7 @@ export default async function ReportsPage({
           En qué se va la plata
         </h2>
         {totalExpenses > 0 ? (
-          <CategoryDonut slices={slices} total={totalExpenses} />
+          <CategoryDonut slices={slices} total={totalExpenses} currency={base} />
         ) : (
           <p className="py-6 text-center text-sm text-black/50 dark:text-white/50">
             No hay gastos en este mes.
@@ -172,14 +172,14 @@ export default async function ReportsPage({
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Ingresos vs gastos (6 meses)
         </h2>
-        <MonthlyBars data={buckets} />
+        <MonthlyBars data={buckets} currency={base} />
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Tendencia del balance
         </h2>
-        <BalanceTrend data={trend} />
+        <BalanceTrend data={trend} currency={base} />
       </section>
     </main>
   );

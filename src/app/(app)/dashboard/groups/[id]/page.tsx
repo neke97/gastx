@@ -41,7 +41,11 @@ export default async function GroupDetailPage({
 
   const [{ data: group }, { data: members }, { data: invites }, { data: expenses }] =
     await Promise.all([
-      supabase.from("groups").select("id, name, owner_id").eq("id", id).maybeSingle(),
+      supabase
+        .from("groups")
+        .select("id, name, owner_id, currency")
+        .eq("id", id)
+        .maybeSingle(),
       supabase
         .from("group_members")
         .select("user_id, role, profiles(display_name)")
@@ -65,6 +69,7 @@ export default async function GroupDetailPage({
   if (!group) notFound();
 
   const isOwner = group.owner_id === user.id;
+  const groupCurrency = group.currency ?? "CRC";
   const memberList = (members ?? []) as unknown as Member[];
   const pending = (invites ?? []) as Invite[];
   const expenseList = (expenses ?? []) as unknown as Expense[];
@@ -172,7 +177,11 @@ export default async function GroupDetailPage({
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Nuevo gasto del grupo
         </h2>
-        <GroupExpenseForm groupId={group.id} memberCount={memberList.length} />
+        <GroupExpenseForm
+          groupId={group.id}
+          memberCount={memberList.length}
+          currency={groupCurrency}
+        />
       </section>
 
       {hasExpenses && (
@@ -189,11 +198,11 @@ export default async function GroupDetailPage({
                 <span>{b.name}</span>
                 {b.net > 0 ? (
                   <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                    le deben {formatMoney(b.net)}
+                    le deben {formatMoney(b.net, groupCurrency)}
                   </span>
                 ) : b.net < 0 ? (
                   <span className="font-medium text-red-600 dark:text-red-400">
-                    debe {formatMoney(-b.net)}
+                    debe {formatMoney(-b.net, groupCurrency)}
                   </span>
                 ) : (
                   <span className="text-black/40 dark:text-white/40">al día</span>
@@ -230,7 +239,7 @@ export default async function GroupDetailPage({
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-sm font-semibold">
-                    {formatMoney(e.amount)}
+                    {formatMoney(e.amount, groupCurrency)}
                   </span>
                   {e.user_id === user.id && (
                     <form action={deleteGroupExpense}>
