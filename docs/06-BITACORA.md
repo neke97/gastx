@@ -59,6 +59,27 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — 404 en producción RESUELTO: Framework Preset
+
+**Causa real:** Vercel devolvía 404 en TODAS las rutas (build "Ready", pero ni `/` ni la
+URL directa del deployment cargaban) porque el **Framework Preset del proyecto no estaba
+en "Next.js"**. El build corría, generaba las 14 rutas y "Deploying outputs...", pero
+Vercel no aplicaba el enrutado de Next → 404 de plataforma en todo. **Fix:** Vercel →
+Settings → Build and Deployment → Framework Preset = **Next.js**. Al redeployar, cargó.
+
+**Notas:**
+- El `vercel.json` (crons) NO era la causa; se mantiene (cron sigue activo).
+- La quita del Proxy (entrada anterior) igual era necesaria (Edge + @supabase/ssr fallaba);
+  no reintroducir sin runtime Node y verificación.
+- Local (`npm start`) siempre funcionó porque ignora la config de Vercel; por eso el
+  problema era 100% de configuración de Vercel.
+
+**Estado: EN PRODUCCIÓN y funcionando.** Usuario instaló la PWA en el celular ✅.
+Las actualizaciones son automáticas (push → Vercel redeploy → la PWA carga lo nuevo al
+abrir; no se reinstala).
+
+---
+
 ## 2026-07-16 — Despliegue 🚀
 
 **Hecho:**
