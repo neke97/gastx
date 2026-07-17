@@ -174,6 +174,43 @@ export async function updateRecurring(
   redirect("/dashboard/recurring");
 }
 
+/**
+ * Atajo: registra AHORA (fecha de hoy) un movimiento a partir de una plantilla,
+ * sin tocar la programación (next_run_on). Es el "tocar para sumar".
+ */
+export async function quickAddFromTemplate(formData: FormData) {
+  const id = String(formData.get("template_id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: t } = await supabase
+    .from("recurring_templates")
+    .select("kind, amount, currency, category_id, name")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!t) return;
+
+  await supabase.from("transactions").insert({
+    user_id: user.id,
+    kind: t.kind,
+    amount: t.amount,
+    currency: t.currency,
+    category_id: t.category_id,
+    description: t.name,
+    occurred_on: todayYMD(),
+    recurring_template_id: id,
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/recurring");
+}
+
 /** Activa o pausa una recurrente. */
 export async function toggleActiveRecurring(formData: FormData) {
   const id = String(formData.get("id") ?? "");

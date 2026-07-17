@@ -59,6 +59,26 @@ sesión con `supabase.auth.getUser()` (server client).
 
 ---
 
+## 2026-07-17 — Recurrentes como "atajos" (tocar para registrar)
+
+**Aclaración del usuario:** no quería tanto la generación automática, sino una LISTA de
+frecuentes (ej. "Bus de Ipis") que al tocar se sume al toque a los gastos.
+
+**Hecho:**
+- Acción `quickAddFromTemplate` (recurring/actions.ts): inserta un movimiento con fecha
+  HOY desde la plantilla, sin tocar `next_run_on` (independiente de lo automático).
+- **Dashboard:** nueva sección "Atajos — tocá para registrar" con chips de las plantillas
+  activas (nombre + monto); al tocar se registra y se actualiza balance/lista. Enlace
+  "Gestionar" a /dashboard/recurring.
+- **Página recurrentes:** botón "Registrar" por fila + texto que reencuadra la feature
+  como lista de frecuentes (lo automático queda opcional).
+- **Verificado:** `npm run build` OK.
+
+**Nota de producto:** el cron automático sigue disponible pero secundario; el flujo
+principal ahora es el tap-to-add.
+
+---
+
 ## 2026-07-17 — 404 en producción RESUELTO: Framework Preset
 
 **Causa real:** Vercel devolvía 404 en TODAS las rutas (build "Ready", pero ni `/` ni la

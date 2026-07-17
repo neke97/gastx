@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RecurringForm } from "@/components/RecurringForm";
 import { GeneratePendingButton } from "@/components/GeneratePendingButton";
-import { toggleActiveRecurring, deleteRecurring } from "./actions";
+import {
+  toggleActiveRecurring,
+  deleteRecurring,
+  quickAddFromTemplate,
+} from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 
@@ -67,6 +71,14 @@ export default async function RecurringPage() {
         <GeneratePendingButton />
       </header>
 
+      <p className="text-sm text-black/60 dark:text-white/60">
+        Tu lista de gastos/ingresos frecuentes (ej. &quot;Bus de Ipis&quot;). Tocá{" "}
+        <span className="font-medium text-emerald-700 dark:text-emerald-400">
+          Registrar
+        </span>{" "}
+        para sumarlo hoy. La generación automática (según la frecuencia) es opcional.
+      </p>
+
       <RecurringForm categories={categories ?? []} />
 
       <section className="flex flex-col gap-2">
@@ -104,6 +116,15 @@ export default async function RecurringPage() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  <form action={quickAddFromTemplate}>
+                    <input type="hidden" name="template_id" value={t.id} />
+                    <SubmitButton
+                      pendingLabel="…"
+                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700"
+                    >
+                      Registrar
+                    </SubmitButton>
+                  </form>
                   <form action={toggleActiveRecurring}>
                     <input type="hidden" name="id" value={t.id} />
                     <input

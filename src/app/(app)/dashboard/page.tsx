@@ -2,9 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteTransaction } from "./actions";
+import { quickAddFromTemplate } from "./recurring/actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
+
+type Shortcut = {
+  id: string;
+  name: string;
+  amount: number;
+  kind: "expense" | "income";
+};
 
 type TxRow = {
   id: string;
@@ -38,6 +46,7 @@ export default async function DashboardPage() {
   const [
     { data: categories },
     { data: people },
+    { data: shortcuts },
     { data: transactions },
     { data: monthRows },
   ] = await Promise.all([
@@ -47,6 +56,11 @@ export default async function DashboardPage() {
       .eq("is_archived", false)
       .order("name"),
     supabase.from("people").select("id, name").order("name"),
+    supabase
+      .from("recurring_templates")
+      .select("id, name, amount, kind")
+      .eq("is_active", true)
+      .order("name"),
     supabase
       .from("transactions")
       .select(
@@ -63,6 +77,7 @@ export default async function DashboardPage() {
   ]);
 
   const txs = (transactions ?? []) as unknown as TxRow[];
+  const quickShortcuts = (shortcuts ?? []) as Shortcut[];
 
   const income = (monthRows ?? [])
     .filter((r) => r.kind === "income")
@@ -112,6 +127,40 @@ export default async function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {quickShortcuts.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
+              Atajos — tocá para registrar
+            </h2>
+            <Link
+              href="/dashboard/recurring"
+              className="text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+            >
+              Gestionar
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {quickShortcuts.map((s) => (
+              <form key={s.id} action={quickAddFromTemplate}>
+                <input type="hidden" name="template_id" value={s.id} />
+                <SubmitButton
+                  pendingLabel="Agregando…"
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    s.kind === "income"
+                      ? "border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 dark:text-emerald-400"
+                      : "border-black/15 hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+                  }`}
+                >
+                  {s.name} · {s.kind === "income" ? "+" : "−"}
+                  {formatMoney(s.amount)}
+                </SubmitButton>
+              </form>
+            ))}
+          </div>
+        </section>
+      )}
 
       <TransactionForm categories={categories ?? []} people={people ?? []} />
 
