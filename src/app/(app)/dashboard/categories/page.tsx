@@ -37,6 +37,14 @@ function CategoryRow({ c }: { c: Category }) {
         )}
       </div>
       <div className="flex shrink-0 items-center gap-1">
+        <Link
+          href={`/dashboard/categories/${c.id}`}
+          aria-label="Editar categoría"
+          title="Editar"
+          className="rounded-md px-2 py-1 text-black/30 transition-colors hover:bg-black/[0.06] hover:text-black/70 dark:text-white/30 dark:hover:bg-white/10 dark:hover:text-white/80"
+        >
+          ✎
+        </Link>
         <form action={toggleArchiveCategory}>
           <input type="hidden" name="id" value={c.id} />
           <input

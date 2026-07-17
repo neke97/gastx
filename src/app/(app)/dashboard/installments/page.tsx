@@ -28,7 +28,7 @@ export default async function InstallmentsPage() {
     await Promise.all([
       supabase
         .from("categories")
-        .select("id, name, kind")
+        .select("id, name, kind, icon")
         .eq("is_archived", false)
         .order("name"),
       supabase

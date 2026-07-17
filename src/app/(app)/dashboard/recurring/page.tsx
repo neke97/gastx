@@ -11,6 +11,7 @@ import {
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 import { buildRateMap, availableCurrencies } from "@/lib/currency";
+import { categoryIcon } from "@/lib/categoryIcons";
 
 type Template = {
   id: string;
@@ -18,10 +19,11 @@ type Template = {
   name: string;
   amount: number;
   currency: string;
-  frequency: "daily" | "weekly" | "monthly" | "yearly";
+  frequency: "daily" | "weekly" | "monthly" | "yearly" | null;
   interval: number;
-  next_run_on: string;
+  next_run_on: string | null;
   is_active: boolean;
+  categories: { icon: string | null; color: string | null } | null;
 };
 
 const FREQ_LABELS: Record<string, string> = {
@@ -32,8 +34,10 @@ const FREQ_LABELS: Record<string, string> = {
 };
 
 function freqText(t: Template) {
+  if (!t.frequency) return "Atajo (sin repetir)";
   const base = FREQ_LABELS[t.frequency];
-  return t.interval > 1 ? `cada ${t.interval} (${base})` : base;
+  const freq = t.interval > 1 ? `cada ${t.interval} (${base})` : base;
+  return t.next_run_on ? `${freq} · próxima ${formatDate(t.next_run_on)}` : freq;
 }
 
 export default async function RecurringPage() {
@@ -47,16 +51,16 @@ export default async function RecurringPage() {
     await Promise.all([
       supabase
         .from("categories")
-        .select("id, name, kind")
+        .select("id, name, kind, icon")
         .eq("is_archived", false)
         .order("name"),
       supabase
         .from("recurring_templates")
         .select(
-          "id, kind, name, amount, currency, frequency, interval, next_run_on, is_active",
+          "id, kind, name, amount, currency, frequency, interval, next_run_on, is_active, categories(icon, color)",
         )
         .order("is_active", { ascending: false })
-        .order("next_run_on"),
+        .order("next_run_on", { nullsFirst: false }),
       supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
       supabase.from("exchange_rates").select("code, rate_to_base"),
     ]);
@@ -64,7 +68,7 @@ export default async function RecurringPage() {
   const base = profile?.default_currency ?? "CRC";
   const currencies = availableCurrencies(base, buildRateMap(rates));
 
-  const list = (templates ?? []) as Template[];
+  const list = (templates ?? []) as unknown as Template[];
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -110,24 +114,35 @@ export default async function RecurringPage() {
                 key={t.id}
                 className={`flex items-center justify-between gap-3 px-4 py-3 ${t.is_active ? "" : "opacity-50"}`}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
-                    <span
-                      className={
-                        t.kind === "income"
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-600 dark:text-red-400"
-                      }
-                    >
-                      {t.kind === "income" ? "+" : "−"}
-                      {formatMoney(t.amount, t.currency)}
-                    </span>{" "}
-                    · {t.name}
-                  </p>
-                  <p className="text-xs text-black/50 dark:text-white/50">
-                    {freqText(t)} · próxima {formatDate(t.next_run_on)}
-                    {!t.is_active ? " · pausada" : ""}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg"
+                    style={{
+                      backgroundColor:
+                        (t.categories?.color ?? "#94a3b8") + "22",
+                    }}
+                  >
+                    {categoryIcon(t.categories?.icon)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      <span
+                        className={
+                          t.kind === "income"
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }
+                      >
+                        {t.kind === "income" ? "+" : "−"}
+                        {formatMoney(t.amount, t.currency)}
+                      </span>{" "}
+                      · {t.name}
+                    </p>
+                    <p className="text-xs text-black/50 dark:text-white/50">
+                      {freqText(t)}
+                      {!t.is_active ? " · pausada" : ""}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <form action={quickAddFromTemplate}>

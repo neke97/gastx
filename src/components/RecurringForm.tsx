@@ -7,8 +7,14 @@ import {
   updateRecurring,
   type RecFormState,
 } from "@/app/(app)/dashboard/recurring/actions";
+import { categoryIcon } from "@/lib/categoryIcons";
 
-type Category = { id: string; name: string; kind: "expense" | "income" };
+type Category = {
+  id: string;
+  name: string;
+  kind: "expense" | "income";
+  icon?: string | null;
+};
 
 type Initial = {
   id: string;
@@ -17,9 +23,9 @@ type Initial = {
   amount: number;
   currency?: string;
   category_id: string | null;
-  frequency: "daily" | "weekly" | "monthly" | "yearly";
+  frequency: "daily" | "weekly" | "monthly" | "yearly" | null;
   interval: number;
-  next_run_on: string;
+  next_run_on: string | null;
 };
 
 const FREQ_LABELS: Record<string, string> = {
@@ -56,6 +62,8 @@ export function RecurringForm({
   const [kind, setKind] = useState<"expense" | "income">(
     initial?.kind ?? "expense",
   );
+  // "auto" = repetir automáticamente según frecuencia. Por defecto off (atajo).
+  const [auto, setAuto] = useState(Boolean(initial?.frequency));
   const [state, formAction, pending] = useActionState<RecFormState, FormData>(
     isEdit ? updateRecurring : addRecurring,
     null,
@@ -66,6 +74,7 @@ export function RecurringForm({
     if (state?.ok && !isEdit) {
       formRef.current?.reset();
       setKind("expense");
+      setAuto(false);
     }
   }, [state, isEdit]);
 
@@ -156,50 +165,64 @@ export function RecurringForm({
           <option value="">Sin categoría</option>
           {visibleCategories.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {categoryIcon(c.icon)} {c.name}
             </option>
           ))}
         </select>
       </label>
 
-      <div className="grid grid-cols-2 gap-2">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Frecuencia</span>
-          <select
-            name="frequency"
-            defaultValue={initial?.frequency ?? "monthly"}
-            className={selectClasses}
-          >
-            {Object.entries(FREQ_LABELS).map(([v, label]) => (
-              <option key={v} value={v}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Cada</span>
-          <input
-            type="number"
-            name="interval"
-            min="1"
-            step="1"
-            defaultValue={initial?.interval ?? 1}
-            className={inputClasses}
-          />
-        </label>
-      </div>
-
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Próxima fecha</span>
+      <input type="hidden" name="auto" value={auto ? "true" : "false"} />
+      <label className="flex items-center gap-2 text-sm font-medium">
         <input
-          type="date"
-          name="next_run_on"
-          required
-          defaultValue={initial?.next_run_on ?? toYMD(new Date())}
-          className={selectClasses}
+          type="checkbox"
+          checked={auto}
+          onChange={(e) => setAuto(e.target.checked)}
+          className="h-4 w-4 accent-blue-600"
         />
+        Repetir automáticamente
       </label>
+
+      {auto && (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Frecuencia</span>
+              <select
+                name="frequency"
+                defaultValue={initial?.frequency ?? "monthly"}
+                className={selectClasses}
+              >
+                {Object.entries(FREQ_LABELS).map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Cada</span>
+              <input
+                type="number"
+                name="interval"
+                min="1"
+                step="1"
+                defaultValue={initial?.interval ?? 1}
+                className={inputClasses}
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">Próxima fecha</span>
+            <input
+              type="date"
+              name="next_run_on"
+              defaultValue={initial?.next_run_on ?? toYMD(new Date())}
+              className={selectClasses}
+            />
+          </label>
+        </>
+      )}
 
       {state?.error && (
         <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>

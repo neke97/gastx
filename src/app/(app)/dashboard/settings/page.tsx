@@ -79,36 +79,38 @@ export default async function SettingsPage() {
 
         <form
           action={upsertRate}
-          className="flex items-end gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10"
+          className="flex flex-col gap-3 rounded-xl border border-black/10 p-3 dark:border-white/10"
         >
-          <label className="flex flex-1 flex-col gap-1 text-xs">
-            Moneda
-            <select name="code" className={selectClasses} defaultValue="USD">
-              {COMMON_CURRENCIES.filter((c) => c !== base).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-1 flex-col gap-1 text-xs">
-            1 unidad = {base}
-            <input
-              type="number"
-              name="rate"
-              required
-              min="0"
-              step="0.000001"
-              inputMode="decimal"
-              placeholder="525"
-              className={inputClasses}
-            />
-          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1 text-xs">
+              Moneda
+              <select name="code" className={selectClasses} defaultValue="USD">
+                {COMMON_CURRENCIES.filter((c) => c !== base).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              1 unidad = {base}
+              <input
+                type="number"
+                name="rate"
+                required
+                min="0"
+                step="0.000001"
+                inputMode="decimal"
+                placeholder="525"
+                className={inputClasses}
+              />
+            </label>
+          </div>
           <SubmitButton
             pendingLabel="…"
-            className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
           >
-            Guardar
+            Guardar tipo de cambio
           </SubmitButton>
         </form>
 

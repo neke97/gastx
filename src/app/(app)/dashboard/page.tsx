@@ -5,7 +5,7 @@ import { deleteTransaction } from "./actions";
 import { quickAddFromTemplate } from "./recurring/actions";
 import { TransactionForm } from "@/components/TransactionForm";
 import { SubmitButton } from "@/components/SubmitButton";
-import { formatMoney, formatDate } from "@/lib/format";
+import { formatMoney, formatDate, formatTime } from "@/lib/format";
 import {
   buildRateMap,
   toBase,
@@ -29,6 +29,7 @@ type TxRow = {
   currency: string;
   description: string | null;
   occurred_on: string;
+  occurred_at: string | null;
   categories: { name: string; icon: string | null; color: string | null } | null;
   transaction_splits: {
     amount_resolved: number;
@@ -36,7 +37,11 @@ type TxRow = {
   }[];
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,11 +51,28 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const { filter } = await searchParams;
+  const listFilter =
+    filter === "income" || filter === "expense" ? filter : "all";
+
   // Rango del mes actual (formato YYYY-MM-DD para comparar con occurred_on).
   const now = new Date();
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const nextMonthStart = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
+
+  // Lista de últimos movimientos, con filtro opcional por tipo.
+  let txQuery = supabase
+    .from("transactions")
+    .select(
+      "id, kind, amount, currency, description, occurred_on, occurred_at, categories(name, icon, color), transaction_splits(amount_resolved, people(name))",
+    )
+    .is("group_id", null);
+  if (listFilter !== "all") txQuery = txQuery.eq("kind", listFilter);
+  txQuery = txQuery
+    .order("occurred_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(30);
 
   const [
     { data: profile },
@@ -65,7 +87,7 @@ export default async function DashboardPage() {
     supabase.from("exchange_rates").select("code, rate_to_base"),
     supabase
       .from("categories")
-      .select("id, name, kind")
+      .select("id, name, kind, icon")
       .eq("is_archived", false)
       .order("name"),
     supabase.from("people").select("id, name").order("name"),
@@ -74,15 +96,7 @@ export default async function DashboardPage() {
       .select("id, name, amount, currency, kind")
       .eq("is_active", true)
       .order("name"),
-    supabase
-      .from("transactions")
-      .select(
-        "id, kind, amount, currency, description, occurred_on, categories(name, icon, color), transaction_splits(amount_resolved, people(name))",
-      )
-      .is("group_id", null)
-      .order("occurred_on", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(30),
+    txQuery,
     supabase
       .from("transactions")
       .select("kind, amount, currency")
@@ -216,6 +230,36 @@ export default async function DashboardPage() {
           Últimos movimientos
         </h2>
 
+        <div className="flex gap-2">
+          {(
+            [
+              { key: "all", label: "Todos", active: "bg-blue-600 text-white" },
+              {
+                key: "income",
+                label: "Ingresos",
+                active: "bg-emerald-600 text-white",
+              },
+              {
+                key: "expense",
+                label: "Gastos",
+                active: "bg-red-600 text-white",
+              },
+            ] as const
+          ).map((f) => (
+            <Link
+              key={f.key}
+              href={f.key === "all" ? "/dashboard" : `/dashboard?filter=${f.key}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                listFilter === f.key
+                  ? f.active
+                  : "border border-black/15 dark:border-white/15"
+              }`}
+            >
+              {f.label}
+            </Link>
+          ))}
+        </div>
+
         {txs.length === 0 ? (
           <p className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-6 text-center text-sm text-black/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
             Todavía no hay movimientos. ¡Agregá el primero arriba!
@@ -244,6 +288,7 @@ export default async function DashboardPage() {
                   <p className="text-xs text-black/50 dark:text-white/50">
                     {t.categories?.name ? `${t.categories.name} · ` : ""}
                     {formatDate(t.occurred_on)}
+                    {t.occurred_at ? ` · ${formatTime(t.occurred_at)}` : ""}
                   </p>
                   {t.transaction_splits.length > 0 && (
                     <p className="mt-0.5 truncate text-xs text-emerald-700/80 dark:text-emerald-400/80">

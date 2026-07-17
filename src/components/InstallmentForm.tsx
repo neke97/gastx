@@ -3,8 +3,14 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { addPlan, type PlanFormState } from "@/app/(app)/dashboard/installments/actions";
 import { formatMoney } from "@/lib/format";
+import { categoryIcon } from "@/lib/categoryIcons";
 
-type Category = { id: string; name: string; kind: "expense" | "income" };
+type Category = {
+  id: string;
+  name: string;
+  kind: "expense" | "income";
+  icon?: string | null;
+};
 
 const FREQ_LABELS: Record<string, string> = {
   weekly: "Semanal",
@@ -130,7 +136,7 @@ export function InstallmentForm({
           <option value="">Sin categoría</option>
           {expenseCats.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {categoryIcon(c.icon)} {c.name}
             </option>
           ))}
         </select>

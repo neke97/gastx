@@ -27,7 +27,7 @@ export default async function EditTransactionPage({
   ] = await Promise.all([
     supabase
       .from("categories")
-      .select("id, name, kind")
+      .select("id, name, kind, icon")
       .eq("is_archived", false)
       .order("name"),
     supabase.from("people").select("id, name").order("name"),
@@ -35,7 +35,9 @@ export default async function EditTransactionPage({
     supabase.from("exchange_rates").select("code, rate_to_base"),
     supabase
       .from("transactions")
-      .select("id, kind, amount, currency, category_id, description, occurred_on")
+      .select(
+        "id, kind, amount, currency, category_id, description, occurred_on, occurred_at",
+      )
       .eq("id", id)
       .is("group_id", null) // los gastos de grupo se editan desde el grupo
       .maybeSingle(),

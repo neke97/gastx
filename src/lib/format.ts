@@ -14,6 +14,22 @@ export function formatMoney(
   }).format(amount);
 }
 
+const TIME_ZONE = "America/Costa_Rica";
+
+/**
+ * Formatea la hora de un timestamp como "14:30", en zona horaria de Costa Rica
+ * (para que sea consistente aunque el servidor esté en UTC).
+ */
+export function formatTime(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat(CURRENCY_LOCALE, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: TIME_ZONE,
+  }).format(d);
+}
+
 /** Formatea una fecha (Date o ISO string) como "15 jul 2026". */
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;

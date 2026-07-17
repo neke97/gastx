@@ -45,23 +45,39 @@ function parseForm(formData: FormData):
       amount: number;
       currency: string;
       categoryId: string | null;
-      frequency: (typeof FREQS)[number];
+      frequency: (typeof FREQS)[number] | null;
       interval: number;
-      nextRunOn: string;
+      nextRunOn: string | null;
     } {
   const kind = String(formData.get("kind") ?? "expense");
   const name = String(formData.get("name") ?? "").trim();
   const amount = Number(formData.get("amount"));
   const currency = String(formData.get("currency") ?? "").trim() || "CRC";
   const categoryId = formData.get("category_id");
-  const frequency = String(formData.get("frequency") ?? "monthly");
-  const interval = Number(formData.get("interval") ?? 1);
-  const nextRunOn = String(formData.get("next_run_on") ?? "").trim();
+  // Repetición automática opcional: si "auto" no está activo, es solo un atajo.
+  const auto = String(formData.get("auto") ?? "") === "true";
 
   if (kind !== "expense" && kind !== "income") return { error: "Tipo inválido." };
   if (!name) return { error: "Escribí un nombre." };
   if (!Number.isFinite(amount) || amount <= 0)
     return { error: "El monto debe ser mayor a 0." };
+
+  const commonFields = {
+    kind: kind as "expense" | "income",
+    name,
+    amount,
+    currency,
+    categoryId: categoryId ? String(categoryId) : null,
+  };
+
+  if (!auto) {
+    return { ...commonFields, frequency: null, interval: 1, nextRunOn: null };
+  }
+
+  const frequency = String(formData.get("frequency") ?? "monthly");
+  const interval = Number(formData.get("interval") ?? 1);
+  const nextRunOn = String(formData.get("next_run_on") ?? "").trim();
+
   if (!FREQS.includes(frequency as (typeof FREQS)[number]))
     return { error: "Frecuencia inválida." };
   if (!Number.isInteger(interval) || interval < 1)
@@ -69,11 +85,7 @@ function parseForm(formData: FormData):
   if (!nextRunOn) return { error: "Elegí la próxima fecha." };
 
   return {
-    kind,
-    name,
-    amount,
-    currency,
-    categoryId: categoryId ? String(categoryId) : null,
+    ...commonFields,
     frequency: frequency as (typeof FREQS)[number],
     interval,
     nextRunOn,
@@ -117,7 +129,7 @@ export async function addRecurring(
   await supabase.from("recurring_amount_history").insert({
     recurring_template_id: inserted.id,
     amount: p.amount,
-    effective_from: p.nextRunOn,
+    effective_from: p.nextRunOn ?? todayYMD(),
   });
 
   revalidate();

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export type CatFormState = { error?: string; ok?: boolean } | null;
@@ -39,6 +40,40 @@ export async function addCategory(
 
   revalidate();
   return { ok: true };
+}
+
+/** Edita una categoría (nombre, tipo, color, ícono). */
+export async function updateCategory(
+  _prev: CatFormState,
+  formData: FormData,
+): Promise<CatFormState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión expiró. Volvé a ingresar." };
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Falta el identificador." };
+
+  const name = String(formData.get("name") ?? "").trim();
+  const kind = String(formData.get("kind") ?? "expense");
+  const color = String(formData.get("color") ?? "").trim() || null;
+  const icon = String(formData.get("icon") ?? "").trim() || null;
+
+  if (!name) return { error: "Escribí un nombre para la categoría." };
+  if (kind !== "expense" && kind !== "income") return { error: "Tipo inválido." };
+
+  const { error } = await supabase
+    .from("categories")
+    .update({ name, kind, color, icon })
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidate();
+  redirect("/dashboard/categories");
 }
 
 /** Archiva o desarchiva una categoría. */

@@ -1,8 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { addCategory, type CatFormState } from "@/app/(app)/dashboard/categories/actions";
-import { CATEGORY_EMOJIS } from "@/lib/categoryIcons";
+import {
+  addCategory,
+  updateCategory,
+  type CatFormState,
+} from "@/app/(app)/dashboard/categories/actions";
+import { CATEGORY_EMOJIS, categoryIcon } from "@/lib/categoryIcons";
+
+type Initial = {
+  id: string;
+  name: string;
+  kind: "expense" | "income";
+  color: string | null;
+  icon: string | null;
+};
 
 const PALETTE = [
   "#059669",
@@ -18,24 +31,27 @@ const PALETTE = [
   "#64748b",
 ];
 
-export function CategoryForm() {
-  const [kind, setKind] = useState<"expense" | "income">("expense");
-  const [color, setColor] = useState(PALETTE[0]);
-  const [icon, setIcon] = useState(CATEGORY_EMOJIS[0]);
+export function CategoryForm({ initial }: { initial?: Initial }) {
+  const isEdit = Boolean(initial);
+  const [kind, setKind] = useState<"expense" | "income">(
+    initial?.kind ?? "expense",
+  );
+  const [color, setColor] = useState(initial?.color ?? PALETTE[0]);
+  const [icon, setIcon] = useState(categoryIcon(initial?.icon));
   const [state, formAction, pending] = useActionState<CatFormState, FormData>(
-    addCategory,
+    isEdit ? updateCategory : addCategory,
     null,
   );
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state?.ok) {
+    if (state?.ok && !isEdit) {
       formRef.current?.reset();
       setKind("expense");
       setColor(PALETTE[0]);
       setIcon(CATEGORY_EMOJIS[0]);
     }
-  }, [state]);
+  }, [state, isEdit]);
 
   return (
     <form
@@ -43,6 +59,7 @@ export function CategoryForm() {
       action={formAction}
       className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
     >
+      {isEdit && <input type="hidden" name="id" value={initial!.id} />}
       <div className="grid grid-cols-2 gap-2">
         {(["expense", "income"] as const).map((k) => (
           <button
@@ -69,6 +86,7 @@ export function CategoryForm() {
           type="text"
           name="name"
           required
+          defaultValue={initial?.name ?? ""}
           placeholder="Ej. Mascotas, Gimnasio…"
           className="rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15"
         />
@@ -121,13 +139,27 @@ export function CategoryForm() {
         <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
-      >
-        {pending ? "Guardando…" : "Agregar categoría"}
-      </button>
+      <div className="mt-1 flex gap-2">
+        {isEdit && (
+          <Link
+            href="/dashboard/categories"
+            className="flex-1 rounded-lg border border-black/15 px-4 py-2.5 text-center font-medium transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+          >
+            Cancelar
+          </Link>
+        )}
+        <button
+          type="submit"
+          disabled={pending}
+          className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+        >
+          {pending
+            ? "Guardando…"
+            : isEdit
+              ? "Guardar cambios"
+              : "Agregar categoría"}
+        </button>
+      </div>
     </form>
   );
 }

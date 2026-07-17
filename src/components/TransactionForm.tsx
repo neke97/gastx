@@ -8,8 +8,14 @@ import {
   type TxFormState,
 } from "@/app/(app)/dashboard/actions";
 import { formatMoney } from "@/lib/format";
+import { categoryIcon } from "@/lib/categoryIcons";
 
-type Category = { id: string; name: string; kind: "expense" | "income" };
+type Category = {
+  id: string;
+  name: string;
+  kind: "expense" | "income";
+  icon?: string | null;
+};
 type Person = { id: string; name: string };
 
 type Initial = {
@@ -19,6 +25,7 @@ type Initial = {
   category_id: string | null;
   description: string | null;
   occurred_on: string;
+  occurred_at?: string | null;
   currency?: string;
 };
 
@@ -37,6 +44,17 @@ function toYMD(d: Date) {
 }
 function round2(n: number) {
   return Math.round(n * 100) / 100;
+}
+/** HH:MM (zona CR) desde un ISO, para precargar la hora al editar. */
+function isoToHHMM(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("es-CR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "America/Costa_Rica",
+  }).format(d);
 }
 
 const selectClasses =
@@ -70,6 +88,9 @@ export function TransactionForm({
     initial?.amount != null ? String(initial.amount) : "",
   );
   const [date, setDate] = useState(initial?.occurred_on ?? today);
+  const [time, setTime] = useState(
+    initial?.occurred_at ? isoToHHMM(initial.occurred_at) : "",
+  );
 
   // División (crear o editar). En edición se precarga desde initialSplits.
   const [splitOn, setSplitOn] = useState(initialSplits.length > 0);
@@ -97,6 +118,7 @@ export function TransactionForm({
       setKind("expense");
       setAmount("");
       setDate(today);
+      setTime("");
       setSplitOn(false);
       setRows([]);
     }
@@ -104,6 +126,13 @@ export function TransactionForm({
 
   const visibleCategories = categories.filter((c) => c.kind === kind);
   const amountNum = Number(amount) || 0;
+
+  // Fecha+hora como instante ISO (si hay hora). Vacío = solo fecha.
+  const occurredAtIso = (() => {
+    if (!time || !date) return "";
+    const d = new Date(`${date}T${time}`);
+    return isNaN(d.getTime()) ? "" : d.toISOString();
+  })();
 
   const addRow = () =>
     setRows((r) => [
@@ -213,7 +242,7 @@ export function TransactionForm({
           <option value="">Sin categoría</option>
           {visibleCategories.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {categoryIcon(c.icon)} {c.name}
             </option>
           ))}
         </select>
@@ -263,6 +292,14 @@ export function TransactionForm({
             Ayer
           </button>
         </div>
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          aria-label="Hora (opcional)"
+          className={`${selectClasses} w-full`}
+        />
+        <input type="hidden" name="occurred_at" value={occurredAtIso} />
       </div>
 
       {/* ---- División entre personas (crear o editar) ---- */}

@@ -136,6 +136,7 @@ export async function addTransaction(
   if (split.error) return { error: split.error };
 
   const currency = String(formData.get("currency") ?? "").trim() || "CRC";
+  const occurredAt = String(formData.get("occurred_at") ?? "").trim() || null;
 
   const { data: inserted, error } = await supabase
     .from("transactions")
@@ -146,6 +147,7 @@ export async function addTransaction(
       currency,
       category_id: categoryId ? String(categoryId) : null,
       description: description || null,
+      occurred_at: occurredAt,
       ...(occurredOn ? { occurred_on: occurredOn } : {}),
     })
     .select("id")
@@ -225,6 +227,7 @@ export async function updateTransaction(
   if (split.error) return { error: split.error };
 
   const currency = String(formData.get("currency") ?? "").trim() || "CRC";
+  const occurredAt = String(formData.get("occurred_at") ?? "").trim() || null;
 
   const { error } = await supabase
     .from("transactions")
@@ -234,6 +237,7 @@ export async function updateTransaction(
       currency,
       category_id: categoryId ? String(categoryId) : null,
       description: description || null,
+      occurred_at: occurredAt,
       ...(occurredOn ? { occurred_on: occurredOn } : {}),
     })
     .eq("id", id)
