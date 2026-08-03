@@ -189,7 +189,11 @@ export function TransactionForm({
           <button
             key={k}
             type="button"
-            onClick={() => setKind(k)}
+            onClick={() => {
+              setKind(k);
+              // La división solo aplica a gastos.
+              if (k === "income") setSplitOn(false);
+            }}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               kind === k
                 ? k === "expense"
@@ -314,7 +318,8 @@ export function TransactionForm({
         <input type="hidden" name="occurred_at" value={occurredAtIso} />
       </div>
 
-      {/* ---- División entre personas (crear o editar) ---- */}
+      {/* ---- División entre personas (solo gastos) ---- */}
+      {kind === "expense" && (
       <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
           <label className="flex items-center gap-2 text-sm font-medium">
             <input
@@ -448,6 +453,7 @@ export function TransactionForm({
             </>
           )}
         </div>
+      )}
 
       {state?.error && (
         <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
@@ -469,7 +475,10 @@ export function TransactionForm({
         )}
         <button
           type="submit"
-          disabled={pending || (splitOn && people.length > 0 && !splitValid)}
+          disabled={
+            pending ||
+            (kind === "expense" && splitOn && people.length > 0 && !splitValid)
+          }
           className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
         >
           {pending ? "Guardando…" : isEdit ? "Guardar cambios" : "Agregar"}

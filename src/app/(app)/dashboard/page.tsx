@@ -37,10 +37,17 @@ type TxRow = {
   }[];
 };
 
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function ymd(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; period?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -51,15 +58,62 @@ export default async function DashboardPage({
     redirect("/login");
   }
 
-  const { filter } = await searchParams;
+  const { filter, period } = await searchParams;
   const listFilter =
     filter === "income" || filter === "expense" ? filter : "all";
 
-  // Rango del mes actual (formato YYYY-MM-DD para comparar con occurred_on).
   const now = new Date();
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const nextMonthStart = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
+  const currentYM = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;
+  const currentYear = now.getFullYear();
+
+  // Período del balance: "all" (general, hasta hoy), "YYYY" (año) o "YYYY-MM" (mes).
+  const p = period ?? "all";
+  let periodStart: string | null = null; // null = sin límite inferior (todo)
+  let periodEnd: string; // límite superior exclusivo
+  let periodKind: "all" | "year" | "month";
+  let periodLabel: string;
+
+  if (/^\d{4}-\d{2}$/.test(p)) {
+    periodKind = "month";
+    const [y, m] = p.split("-").map(Number);
+    periodStart = `${p}-01`;
+    periodEnd = ymd(new Date(y, m, 1));
+    periodLabel = new Intl.DateTimeFormat("es-CR", {
+      month: "long",
+      year: "numeric",
+    }).format(new Date(y, m - 1, 1));
+  } else if (/^\d{4}$/.test(p)) {
+    periodKind = "year";
+    const y = Number(p);
+    periodStart = `${y}-01-01`;
+    periodEnd = `${y + 1}-01-01`;
+    periodLabel = String(y);
+  } else {
+    periodKind = "all";
+    periodStart = null;
+    // "Hasta hoy": excluir fechas futuras (ej. recurrentes por generar).
+    periodEnd = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+    periodLabel = "General";
+  }
+
+  // Enlaces que preservan el filtro de lista y el período entre sí.
+  const mkHref = (next: { filter?: string; period?: string }) => {
+    const sp = new URLSearchParams();
+    const f = "filter" in next ? next.filter : listFilter !== "all" ? listFilter : undefined;
+    const pr = "period" in next ? next.period : periodKind !== "all" ? p : undefined;
+    if (f) sp.set("filter", f);
+    if (pr) sp.set("period", pr);
+    const qs = sp.toString();
+    return qs ? `/dashboard?${qs}` : "/dashboard";
+  };
+
+  // Balance del período seleccionado.
+  let periodQuery = supabase
+    .from("transactions")
+    .select("kind, amount, currency")
+    .is("group_id", null)
+    .lt("occurred_on", periodEnd);
+  if (periodStart) periodQuery = periodQuery.gte("occurred_on", periodStart);
 
   // Lista de últimos movimientos, con filtro opcional por tipo.
   let txQuery = supabase
@@ -81,7 +135,7 @@ export default async function DashboardPage({
     { data: people },
     { data: shortcuts },
     { data: transactions },
-    { data: monthRows },
+    { data: periodRows },
   ] = await Promise.all([
     supabase.from("profiles").select("default_currency").eq("id", user.id).maybeSingle(),
     supabase.from("exchange_rates").select("code, rate_to_base"),
@@ -97,12 +151,7 @@ export default async function DashboardPage({
       .eq("is_active", true)
       .order("name"),
     txQuery,
-    supabase
-      .from("transactions")
-      .select("kind, amount, currency")
-      .is("group_id", null)
-      .gte("occurred_on", monthStart)
-      .lt("occurred_on", nextMonthStart),
+    periodQuery,
   ]);
 
   const txs = (transactions ?? []) as unknown as TxRow[];
@@ -114,7 +163,7 @@ export default async function DashboardPage({
 
   // Solo sumamos lo convertible; lo que no tenga tasa se avisa aparte (no se
   // cuenta como 1:1, que descuadraría el total).
-  const convertible = (monthRows ?? []).filter((r) =>
+  const convertible = (periodRows ?? []).filter((r) =>
     canConvert(r.currency, base, rateMap),
   );
   const income = convertible
@@ -127,16 +176,14 @@ export default async function DashboardPage({
 
   const missingCurrencies = [
     ...new Set(
-      (monthRows ?? [])
+      (periodRows ?? [])
         .filter((r) => !canConvert(r.currency, base, rateMap))
         .map((r) => r.currency),
     ),
   ];
 
-  const monthLabel = new Intl.DateTimeFormat("es-CR", {
-    month: "long",
-    year: "numeric",
-  }).format(now);
+  // Años para el selector (actual y 5 hacia atrás).
+  const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
@@ -146,8 +193,83 @@ export default async function DashboardPage({
       </header>
 
       <section className="rounded-2xl border border-black/10 bg-gradient-to-br from-emerald-500/10 to-transparent p-5 dark:border-white/10">
+        {/* Selector de período */}
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                { key: "all", label: "General", period: undefined },
+                { key: "month", label: "Este mes", period: currentYM },
+                { key: "year", label: "Este año", period: String(currentYear) },
+              ] as const
+            ).map((opt) => {
+              const active =
+                opt.key === "all"
+                  ? periodKind === "all"
+                  : opt.period === p;
+              return (
+                <Link
+                  key={opt.key}
+                  href={mkHref({ period: opt.period })}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "bg-emerald-600 text-white"
+                      : "border border-black/15 dark:border-white/15"
+                  }`}
+                >
+                  {opt.label}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <form method="get" className="flex items-center gap-1">
+              {listFilter !== "all" && (
+                <input type="hidden" name="filter" value={listFilter} />
+              )}
+              <input
+                type="month"
+                name="period"
+                defaultValue={periodKind === "month" ? p : currentYM}
+                max={currentYM}
+                aria-label="Ver un mes específico"
+                className="rounded-lg border border-black/15 bg-white px-2 py-1 text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white"
+              />
+              <button
+                type="submit"
+                className="rounded-lg border border-black/15 px-2.5 py-1 font-medium transition-colors hover:bg-black/[0.06] dark:border-white/15 dark:hover:bg-white/10"
+              >
+                Ver mes
+              </button>
+            </form>
+            <form method="get" className="flex items-center gap-1">
+              {listFilter !== "all" && (
+                <input type="hidden" name="filter" value={listFilter} />
+              )}
+              <select
+                name="period"
+                defaultValue={periodKind === "year" ? p : String(currentYear)}
+                aria-label="Ver un año específico"
+                className="rounded-lg border border-black/15 bg-white px-2 py-1 text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white"
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="rounded-lg border border-black/15 px-2.5 py-1 font-medium transition-colors hover:bg-black/[0.06] dark:border-white/15 dark:hover:bg-white/10"
+              >
+                Ver año
+              </button>
+            </form>
+          </div>
+        </div>
+
         <p className="text-xs font-medium uppercase tracking-wide text-black/50 dark:text-white/50">
-          Balance de {monthLabel}
+          {periodKind === "all" ? "Balance general" : `Balance de ${periodLabel}`}
         </p>
         <p
           className={`mt-1 text-3xl font-bold tracking-tight ${
@@ -248,7 +370,7 @@ export default async function DashboardPage({
           ).map((f) => (
             <Link
               key={f.key}
-              href={f.key === "all" ? "/dashboard" : `/dashboard?filter=${f.key}`}
+              href={mkHref({ filter: f.key === "all" ? undefined : f.key })}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 listFilter === f.key
                   ? f.active

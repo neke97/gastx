@@ -5,6 +5,21 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-07-17 — División solo en gastos + balance general con período
+
+**Hecho:**
+- `TransactionForm`: la sección **"Dividir entre personas" solo aparece en gastos**
+  (`kind === "expense"`). Al cambiar a Ingreso se apaga la división y su validación
+  deja de bloquear el submit.
+- **Dashboard — balance por período** (antes era fijo del mes actual). Ahora por
+  defecto muestra **Balance general** (todo lo pasado hasta hoy, excluye fechas
+  futuras). Selector: botones General / Este mes / Este año + picker de mes
+  (`input type=month`) y de año (select, año actual y 5 atrás). Param `?period=`
+  = `all` | `YYYY` | `YYYY-MM`. Helper `mkHref` preserva filtro de lista y período
+  entre sí. La etiqueta muestra "Balance general" o "Balance de {período}".
+
+---
+
 ## 2026-07-17 — Pagos reales con PayPal (suscripción mensual/anual)
 
 **Hecho:**
