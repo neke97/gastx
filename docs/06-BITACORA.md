@@ -5,6 +5,26 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-10-29 — Indicador "Cargando…" en todo lo que consulta la BD (rama `develop`)
+
+**Hecho:**
+- `LoadingIndicator` (en el layout raíz, dentro de `Suspense`): barrita animada arriba +
+  pastilla "Cargando…". Se enciende al tocar enlaces internos, enviar filtros GET (mes/año)
+  o ir atrás/adelante, y se apaga cuando cambia la URL. También se enciende mientras haya
+  algún `button[aria-busy="true"]` (server actions). Mínimo visible 350 ms, tope 20 s.
+- Todos los botones que guardan/borran muestran ruedita (`Spinner`/`Busy`) y ponen
+  `aria-busy` mientras esperan: `SubmitButton`, `ConfirmSubmitButton` y los formularios con
+  `useActionState` (movimiento, recurrente, cuotas, categoría, grupo, invitar, etc.).
+- Los avisos (`Toaster`) bajaron un poco para no tapar la pastilla.
+
+**Convención:** botón nuevo que llame a la BD → usar `SubmitButton`, o poner
+`aria-busy={pending}` + `<Busy label="…" />`. Así entra solo al indicador global.
+
+**Verificado** con Supabase falso lento (1,5 s): aparece al navegar, al filtrar y al
+registrar; desaparece al terminar y luego sale el aviso.
+
+---
+
 ## 2026-10-29 — Rediseño visual y de UX (rama `develop` → **en producción**)
 
 **Publicado:** `main` = `cf3ec43`; verificado en gastx.vercel.app (`/`, `/login`, `/api/version` 200; `/dashboard` sin sesión → `/login`). El Proxy funciona en producción.
