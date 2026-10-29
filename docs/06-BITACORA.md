@@ -5,7 +5,9 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
-## 2026-10-29 — Rediseño visual y de UX (rama `develop`)
+## 2026-10-29 — Rediseño visual y de UX (rama `develop` → **en producción**)
+
+**Publicado:** `main` = `cf3ec43`; verificado en gastx.vercel.app (`/`, `/login`, `/api/version` 200; `/dashboard` sin sesión → `/login`). El Proxy funciona en producción.
 
 **Hecho:**
 - **Base visual:** ahora sí se usa la fuente Geist (`globals.css` forzaba Arial), fondo
