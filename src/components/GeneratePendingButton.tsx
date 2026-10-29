@@ -1,36 +1,42 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import {
   generatePending,
   type GenState,
 } from "@/app/(app)/dashboard/recurring/actions";
+import { toast } from "@/components/Toaster";
+import { Icon } from "@/components/Icon";
 
+/** Genera los movimientos automáticos que quedaron pendientes; avisa con un toast. */
 export function GeneratePendingButton() {
   const [state, action, pending] = useActionState<GenState, FormData>(
     generatePending,
     null,
   );
 
+  useEffect(() => {
+    if (state?.error) toast(state.error, "error");
+    else if (typeof state?.created === "number") {
+      toast(
+        state.created === 0
+          ? "Todo al día, no había pendientes"
+          : `Se generaron ${state.created} movimiento(s)`,
+      );
+    }
+  }, [state]);
+
   return (
-    <form action={action} className="flex flex-col gap-1">
+    <form action={action}>
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg border border-emerald-600/40 bg-emerald-600/10 px-4 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-600/20 disabled:opacity-60 dark:text-emerald-400"
+        title="Generar los movimientos automáticos pendientes"
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/25 disabled:opacity-60 dark:text-emerald-400"
       >
-        {pending ? "Generando…" : "Generar pendientes"}
+        <Icon name="sparkles" size={15} />
+        {pending ? "Generando…" : "Generar"}
       </button>
-      {state?.error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
-      )}
-      {typeof state?.created === "number" && (
-        <p className="text-sm text-emerald-600 dark:text-emerald-400">
-          {state.created === 0
-            ? "No había movimientos pendientes."
-            : `Se generaron ${state.created} movimiento(s).`}
-        </p>
-      )}
     </form>
   );
 }

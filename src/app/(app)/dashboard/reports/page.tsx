@@ -7,6 +7,7 @@ import { BalanceTrend, type TrendPoint } from "@/components/BalanceTrend";
 import { TopExpensesBars } from "@/components/TopExpensesBars";
 import { buildRateMap, toBase, canConvert } from "@/lib/currency";
 import { categoryIcon } from "@/lib/categoryIcons";
+import { PageHeader } from "@/components/PageHeader";
 
 const OTHER_COLOR = "#64748b";
 const TOP_EXPENSES = 8;
@@ -155,16 +156,8 @@ export default async function ReportsPage({
     "rounded-lg border border-black/15 px-3 py-1.5 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]";
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Reportes</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Reportes" />
 
       {/* Filtro por mes */}
       <div className="flex items-center justify-between gap-2">
@@ -183,7 +176,7 @@ export default async function ReportsPage({
         )}
       </div>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+      <section className="flex flex-col gap-4 card p-5">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           En qué se va la plata
         </h2>
@@ -197,7 +190,7 @@ export default async function ReportsPage({
       </section>
 
       {topExpenses.length > 0 && (
-        <section className="flex flex-col gap-3 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+        <section className="flex flex-col gap-3 card p-5">
           <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
             Mayores gastos del mes
           </h2>
@@ -205,14 +198,14 @@ export default async function ReportsPage({
         </section>
       )}
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+      <section className="flex flex-col gap-4 card p-5">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Ingresos vs gastos (6 meses)
         </h2>
         <MonthlyBars data={buckets} currency={base} />
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+      <section className="flex flex-col gap-4 card p-5">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Tendencia del balance
         </h2>

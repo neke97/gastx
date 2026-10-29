@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryForm } from "@/components/CategoryForm";
+import { PageHeader } from "@/components/PageHeader";
 
 export default async function EditCategoryPage({
   params,
@@ -25,16 +25,8 @@ export default async function EditCategoryPage({
   if (!category) notFound();
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/categories"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Editar categoría</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Editar categoría" back="/dashboard/categories" />
 
       <CategoryForm initial={category} />
     </main>

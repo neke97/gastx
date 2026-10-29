@@ -77,7 +77,7 @@ export default async function SubscribePage() {
       </section>
 
       {/* Código promocional */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-black/10 p-5 dark:border-white/10">
+      <section className="flex flex-col gap-3 card p-5">
         <h2 className="font-semibold">¿Tenés un código?</h2>
         <PromoCodeForm />
       </section>

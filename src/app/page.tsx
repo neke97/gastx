@@ -1,46 +1,54 @@
 import Link from "next/link";
 import { InstallAppButton } from "@/components/InstallAppButton";
 
+const FEATURES = [
+  { icon: "⚡", title: "Gastos en 2 toques", text: "Monto, categoría y listo." },
+  { icon: "🔁", title: "Recurrentes", text: "Salario, alquiler, pase de bus." },
+  { icon: "👥", title: "Dividir gastos", text: "Por monto o por porcentaje." },
+  { icon: "💳", title: "Cuotas", text: "Mirá cuánto te falta pagar." },
+  { icon: "📊", title: "Reportes", text: "A dónde se va la plata." },
+  { icon: "🌎", title: "Multi-moneda", text: "Colones, dólares y más." },
+];
+
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-700 text-4xl font-bold text-white shadow-lg">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-5 pb-12 pt-10">
+      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 px-6 pb-8 pt-10 text-center text-white shadow-2xl shadow-emerald-700/30">
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-black/10" />
+        <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-4xl font-bold text-emerald-600 shadow-lg">
           ₡
         </div>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">GastX</h1>
-        <p className="max-w-md text-balance text-base text-black/60 dark:text-white/60">
-          Registrá tus gastos e ingresos, dividí gastos entre personas,
-          controlá cuotas y mirá a dónde se va la plata.
+        <h1 className="relative mt-5 text-4xl font-bold tracking-tight">GastX</h1>
+        <p className="relative mx-auto mt-2 max-w-xs text-balance text-white/85">
+          Tus gastos e ingresos claros, bonitos y siempre a mano.
         </p>
-      </div>
+        <Link
+          href="/login"
+          className="relative mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-3.5 font-semibold text-emerald-700 shadow-lg"
+        >
+          Empezar gratis
+        </Link>
+        <p className="relative mt-3 text-xs text-white/70">Sin tarjeta · Funciona en tu celular</p>
+      </section>
 
-      <ul className="grid w-full max-w-md gap-3 text-left">
-        {[
-          "Gastos e ingresos en pocos toques",
-          "Recurrentes: salario, mensualidad, pases de bus",
-          "Dividir gastos por monto o porcentaje",
-          "Control de compras a cuotas",
-          "Reportes y gráficos visuales",
-        ].map((item) => (
-          <li
-            key={item}
-            className="flex items-center gap-3 rounded-xl border border-black/10 bg-black/[0.02] px-4 py-3 text-sm dark:border-white/10 dark:bg-white/[0.03]"
-          >
-            <span className="text-emerald-600 dark:text-emerald-400">✓</span>
-            {item}
-          </li>
+      <section className="grid grid-cols-2 gap-3">
+        {FEATURES.map((f) => (
+          <div key={f.title} className="card p-4">
+            <span className="text-2xl" aria-hidden>
+              {f.icon}
+            </span>
+            <p className="mt-2 text-sm font-semibold">{f.title}</p>
+            <p className="mt-0.5 text-xs text-black/50 dark:text-white/50">{f.text}</p>
+          </div>
         ))}
-      </ul>
+      </section>
 
-      <Link
-        href="/login"
-        className="rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-700"
-      >
-        Ingresar
-      </Link>
+      <InstallAppButton className="mx-auto" />
 
-      <InstallAppButton />
+      <p className="text-center text-xs text-black/35 dark:text-white/35">
+        Hecho con 💚 en Costa Rica
+      </p>
     </main>
   );
 }

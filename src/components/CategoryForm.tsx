@@ -57,24 +57,26 @@ export function CategoryForm({ initial }: { initial?: Initial }) {
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
+      className="flex flex-col gap-3 card p-4"
     >
       {isEdit && <input type="hidden" name="id" value={initial!.id} />}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-black/[0.05] p-1 dark:bg-white/[0.07]">
         {(["expense", "income"] as const).map((k) => (
           <button
             key={k}
             type="button"
             onClick={() => setKind(k)}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
               kind === k
-                ? k === "expense"
-                  ? "bg-red-600 text-white"
-                  : "bg-emerald-600 text-white"
-                : "border border-black/15 dark:border-white/15"
+                ? `bg-white shadow-sm dark:bg-white/15 ${
+                    k === "expense"
+                      ? "text-rose-600 dark:text-rose-300"
+                      : "text-emerald-600 dark:text-emerald-300"
+                  }`
+                : "text-black/50 dark:text-white/50"
             }`}
           >
-            {k === "expense" ? "Gasto" : "Ingreso"}
+            {k === "expense" ? "↓ Gasto" : "↑ Ingreso"}
           </button>
         ))}
       </div>

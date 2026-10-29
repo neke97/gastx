@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateGroupForm } from "@/components/CreateGroupForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { acceptInvite, declineInvite } from "./actions";
+import { PageHeader } from "@/components/PageHeader";
 
 type GroupRow = { groups: { id: string; name: string } | null };
 type Invite = {
@@ -38,16 +39,8 @@ export default async function GroupsPage() {
   const pending = (invites ?? []) as unknown as Invite[];
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/more"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Grupos</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Grupos" />
 
       <p className="text-sm text-black/60 dark:text-white/60">
         Compartí un grupo (hogar, viaje…) con otras personas para dividir gastos
@@ -61,7 +54,7 @@ export default async function GroupsPage() {
           <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
             Invitaciones pendientes
           </h2>
-          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
             {pending.map((inv) => (
               <li
                 key={inv.id}
@@ -104,11 +97,11 @@ export default async function GroupsPage() {
           Mis grupos
         </h2>
         {groups.length === 0 ? (
-          <p className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-6 text-center text-sm text-black/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+          <p className="card px-4 py-6 text-center text-sm text-black/50 dark:text-white/50">
             Todavía no estás en ningún grupo.
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
             {groups.map((g) => (
               <li key={g.id}>
                 <Link

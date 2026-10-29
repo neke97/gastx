@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -6,6 +5,7 @@ import { COMMON_CURRENCIES } from "@/lib/currency";
 import { formatDate } from "@/lib/format";
 import { PLANS, type PlanInterval } from "@/lib/plans";
 import { PAYWALL_ENABLED } from "@/lib/access";
+import { PageHeader } from "@/components/PageHeader";
 import {
   updateBaseCurrency,
   upsertRate,
@@ -58,16 +58,8 @@ export default async function SettingsPage() {
   const isSubscriber = PAYWALL_ENABLED && plan === "pro" && Boolean(subStatus);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/more"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Ajustes</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Ajustes" back="/dashboard/more" />
 
       {/* Mi suscripción */}
       {isSubscriber && (
@@ -75,7 +67,7 @@ export default async function SettingsPage() {
           <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
             Mi suscripción
           </h2>
-          <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-4 dark:border-white/10">
+          <div className="flex flex-col gap-2 card p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">
                 GastX Pro
@@ -143,7 +135,7 @@ export default async function SettingsPage() {
 
         <form
           action={upsertRate}
-          className="flex flex-col gap-3 rounded-xl border border-black/10 p-3 dark:border-white/10"
+          className="flex flex-col gap-3 card p-3"
         >
           <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1 text-xs">
@@ -179,11 +171,11 @@ export default async function SettingsPage() {
         </form>
 
         {rateList.length === 0 ? (
-          <p className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-4 text-center text-sm text-black/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+          <p className="card px-4 py-4 text-center text-sm text-black/50 dark:text-white/50">
             Sin tipos de cambio. Con solo la moneda base, la app funciona en una moneda.
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
             {rateList.map((r) => (
               <li
                 key={r.id}

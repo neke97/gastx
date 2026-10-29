@@ -26,9 +26,9 @@ function toYMD(d: Date) {
 }
 
 const selectClasses =
-  "rounded-lg border border-black/15 bg-white px-3 py-2.5 text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white";
+  "w-full rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] text-black outline-none transition-colors focus:border-emerald-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-white";
 const inputClasses =
-  "rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15";
+  "w-full rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] text-black outline-none transition-colors focus:border-emerald-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-white";
 
 export function InstallmentForm({
   categories,
@@ -68,7 +68,7 @@ export function InstallmentForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
+      className="flex flex-col gap-3"
     >
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Nombre</span>
@@ -184,7 +184,7 @@ export function InstallmentForm({
       <button
         type="submit"
         disabled={pending}
-        className="mt-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+        className="mt-1 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700 disabled:opacity-50"
       >
         {pending ? "Creando…" : "Crear plan de cuotas"}
       </button>

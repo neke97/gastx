@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { payInstallment, unpayInstallment, updatePlanInfo } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { formatMoney, formatDate } from "@/lib/format";
 import { categoryIcon } from "@/lib/categoryIcons";
+import { PageHeader } from "@/components/PageHeader";
 
 type Plan = {
   id: string;
@@ -77,18 +77,10 @@ export default async function PlanDetailPage({
   const nextDue = list.find((x) => !x.paid_on);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/installments"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">{p.name}</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title={p.name} back="/dashboard/installments" />
 
-      <section className="rounded-2xl border border-black/10 bg-gradient-to-br from-emerald-500/10 to-transparent p-5 dark:border-white/10">
+      <section className="card bg-gradient-to-br from-emerald-500/10 to-transparent p-5">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-black/50 dark:text-white/50">Falta pagar</p>
@@ -113,7 +105,7 @@ export default async function PlanDetailPage({
       </section>
 
       {/* Editar el plan (nombre y categoría) */}
-      <details className="rounded-2xl border border-black/10 p-4 dark:border-white/10">
+      <details className="card p-4">
         <summary className="cursor-pointer text-sm font-semibold text-black/70 dark:text-white/70">
           Editar plan
         </summary>
@@ -159,7 +151,7 @@ export default async function PlanDetailPage({
         fecha de vencimiento.
       </p>
 
-      <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+      <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
         {list.map((c) => {
           const overdue = !c.paid_on && c.due_date < todayStr;
           return (

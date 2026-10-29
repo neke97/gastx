@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TransactionForm } from "@/components/TransactionForm";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PageHeader } from "@/components/PageHeader";
+import { deleteTransaction } from "../actions";
 import { buildRateMap, availableCurrencies } from "@/lib/currency";
 
 export default async function EditTransactionPage({
@@ -54,17 +56,10 @@ export default async function EditTransactionPage({
   const currencies = availableCurrencies(base, rateMap);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Editar movimiento</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Editar movimiento" back="/dashboard" />
 
+      <div className="card p-5">
       <TransactionForm
         categories={categories ?? []}
         people={people ?? []}
@@ -79,6 +74,20 @@ export default async function EditTransactionPage({
           }[]
         }
       />
+      </div>
+
+      <form action={deleteTransaction} className="flex justify-center">
+        <input type="hidden" name="id" value={tx.id} />
+        <input type="hidden" name="back" value="1" />
+        <ConfirmSubmitButton
+          aria-label="Eliminar movimiento"
+          confirmLabel="¿Seguro? Tocá de nuevo para eliminar"
+          className="rounded-full px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
+          confirmClassName="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white"
+        >
+          🗑 Eliminar movimiento
+        </ConfirmSubmitButton>
+      </form>
     </main>
   );
 }

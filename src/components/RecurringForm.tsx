@@ -43,9 +43,9 @@ function toYMD(d: Date) {
 }
 
 const selectClasses =
-  "rounded-lg border border-black/15 bg-white px-3 py-2.5 text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white";
+  "w-full rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] text-black outline-none transition-colors focus:border-emerald-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-white";
 const inputClasses =
-  "rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15";
+  "w-full rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] text-black outline-none transition-colors focus:border-emerald-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-white";
 
 export function RecurringForm({
   categories,
@@ -92,25 +92,27 @@ export function RecurringForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
+      className="flex flex-col gap-3"
     >
       {isEdit && <input type="hidden" name="id" value={initial!.id} />}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-black/[0.05] p-1 dark:bg-white/[0.07]">
         {(["expense", "income"] as const).map((k) => (
           <button
             key={k}
             type="button"
             onClick={() => setKind(k)}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
               kind === k
-                ? k === "expense"
-                  ? "bg-red-600 text-white"
-                  : "bg-emerald-600 text-white"
-                : "border border-black/15 dark:border-white/15"
+                ? `bg-white shadow-sm dark:bg-white/15 ${
+                    k === "expense"
+                      ? "text-rose-600 dark:text-rose-300"
+                      : "text-emerald-600 dark:text-emerald-300"
+                  }`
+                : "text-black/50 dark:text-white/50"
             }`}
           >
-            {k === "expense" ? "Gasto" : "Ingreso"}
+            {k === "expense" ? "↓ Gasto" : "↑ Ingreso"}
           </button>
         ))}
       </div>
@@ -249,7 +251,7 @@ export function RecurringForm({
         {isEdit && (
           <Link
             href="/dashboard/recurring"
-            className="flex-1 rounded-lg border border-black/15 px-4 py-2.5 text-center font-medium transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+            className="flex-1 rounded-2xl border border-black/10 px-4 py-3.5 text-center font-semibold transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
           >
             Cancelar
           </Link>
@@ -257,7 +259,7 @@ export function RecurringForm({
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+          className="flex-1 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700 disabled:opacity-50"
         >
           {pending ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear recurrente"}
         </button>

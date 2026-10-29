@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasAccess, ACCESS_COLUMNS, PAYWALL_ENABLED } from "@/lib/access";
 import { BottomNav } from "@/components/BottomNav";
+import { Toaster } from "@/components/Toaster";
 
 export default async function AppLayout({
   children,
@@ -26,8 +27,9 @@ export default async function AppLayout({
 
   return (
     <>
-      <div className="fade-in flex w-full flex-1 flex-col pb-20">{children}</div>
+      <div className="fade-in flex w-full flex-1 flex-col pb-24">{children}</div>
       <BottomNav />
+      <Toaster />
     </>
   );
 }

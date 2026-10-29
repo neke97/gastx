@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InviteMemberForm } from "@/components/InviteMemberForm";
 import { GroupExpenseForm } from "@/components/GroupExpenseForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { PageHeader } from "@/components/PageHeader";
 import {
   leaveGroup,
   removeMember,
@@ -112,22 +112,14 @@ export default async function GroupDetailPage({
   const hasExpenses = expenseList.length > 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard/groups"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">{group.name}</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title={group.name} back="/dashboard/groups" />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
           Miembros
         </h2>
-        <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+        <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
           {memberList.map((m) => (
             <li
               key={m.user_id}
@@ -197,7 +189,7 @@ export default async function GroupDetailPage({
           <h2 className="text-sm font-semibold text-black/70 dark:text-white/70">
             Saldos
           </h2>
-          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
             {balances.map((b) => (
               <li
                 key={b.userId}
@@ -226,11 +218,11 @@ export default async function GroupDetailPage({
           Gastos del grupo
         </h2>
         {!hasExpenses ? (
-          <p className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-6 text-center text-sm text-black/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+          <p className="card px-4 py-6 text-center text-sm text-black/50 dark:text-white/50">
             Todavía no hay gastos en este grupo.
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+          <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
             {expenseList.map((e) => (
               <li
                 key={e.id}

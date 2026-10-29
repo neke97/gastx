@@ -5,6 +5,7 @@ import { CategoryForm } from "@/components/CategoryForm";
 import { toggleArchiveCategory, deleteCategory } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { categoryIcon } from "@/lib/categoryIcons";
+import { PageHeader } from "@/components/PageHeader";
 
 type Category = {
   id: string;
@@ -93,16 +94,8 @@ export default async function CategoriesPage() {
   const expense = categories.filter((c) => c.kind === "expense");
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">
-      <header className="flex items-center gap-3">
-        <Link
-          href="/dashboard"
-          className="text-sm text-black/60 hover:underline dark:text-white/60"
-        >
-          ← Volver
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight">Categorías</h1>
-      </header>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-6">
+      <PageHeader title="Categorías" back="/dashboard/more" />
 
       <CategoryForm />
 
@@ -115,11 +108,11 @@ export default async function CategoriesPage() {
             {group.title}
           </h2>
           {group.items.length === 0 ? (
-            <p className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-4 text-center text-sm text-black/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+            <p className="card px-4 py-4 text-center text-sm text-black/50 dark:text-white/50">
               Sin categorías todavía.
             </p>
           ) : (
-            <ul className="flex flex-col divide-y divide-black/5 overflow-hidden rounded-xl border border-black/10 dark:divide-white/5 dark:border-white/10">
+            <ul className="flex flex-col divide-y divide-black/5 overflow-hidden card dark:divide-white/5">
               {group.items.map((c) => (
                 <CategoryRow key={c.id} c={c} />
               ))}

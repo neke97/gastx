@@ -286,4 +286,6 @@ export async function deleteTransaction(formData: FormData) {
     .eq("user_id", user.id);
 
   revalidatePath("/dashboard");
+  // Borrado desde la página de edición: volver al inicio.
+  if (formData.get("back")) redirect("/dashboard");
 }

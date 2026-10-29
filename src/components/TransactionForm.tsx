@@ -9,6 +9,7 @@ import {
 } from "@/app/(app)/dashboard/actions";
 import { formatMoney } from "@/lib/format";
 import { categoryIcon } from "@/lib/categoryIcons";
+import { toast } from "@/components/Toaster";
 
 type Category = {
   id: string;
@@ -56,11 +57,25 @@ function isoToHHMM(iso: string): string {
     timeZone: "America/Costa_Rica",
   }).format(d);
 }
+/** Símbolo de la moneda (₡, $, €…) para mostrar junto al monto. */
+function currencySymbol(code: string) {
+  try {
+    return (
+      new Intl.NumberFormat("es-CR", { style: "currency", currency: code })
+        .formatToParts(0)
+        .find((p) => p.type === "currency")?.value ?? code
+    );
+  } catch {
+    return code;
+  }
+}
 
-const selectClasses =
-  "rounded-lg border border-black/15 bg-white px-3 py-2.5 text-black outline-none focus:border-emerald-500 dark:border-white/15 dark:bg-neutral-900 dark:text-white";
-const inputClasses =
-  "rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15";
+const fieldClasses =
+  "w-full rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] text-black outline-none transition-colors placeholder:text-black/35 focus:border-emerald-500 focus:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/35 dark:focus:bg-white/[0.08]";
+const chipBase =
+  "rounded-full px-3.5 py-2 text-sm font-medium transition-colors";
+const chipIdle =
+  "bg-black/[0.04] text-black/70 hover:bg-black/[0.07] dark:bg-white/[0.06] dark:text-white/75";
 
 export function TransactionForm({
   categories,
@@ -69,6 +84,7 @@ export function TransactionForm({
   initialSplits = [],
   baseCurrency = "CRC",
   currencies = ["CRC"],
+  onSaved,
 }: {
   categories: Category[];
   people?: Person[];
@@ -76,6 +92,8 @@ export function TransactionForm({
   initialSplits?: InitialSplit[];
   baseCurrency?: string;
   currencies?: string[];
+  /** Se llama tras guardar un movimiento nuevo (ej. para cerrar la hoja). */
+  onSaved?: () => void;
 }) {
   const isEdit = Boolean(initial);
   const today = toYMD(new Date());
@@ -87,6 +105,8 @@ export function TransactionForm({
   const [amount, setAmount] = useState(
     initial?.amount != null ? String(initial.amount) : "",
   );
+  const [currency, setCurrency] = useState(initial?.currency ?? baseCurrency);
+  const [categoryId, setCategoryId] = useState(initial?.category_id ?? "");
   const [date, setDate] = useState(initial?.occurred_on ?? today);
   const [time, setTime] = useState(
     initial?.occurred_at ? isoToHHMM(initial.occurred_at) : "",
@@ -114,15 +134,21 @@ export function TransactionForm({
 
   useEffect(() => {
     if (state?.ok && !isEdit) {
+      toast(kind === "expense" ? "Gasto agregado" : "Ingreso agregado");
       formRef.current?.reset();
       setKind("expense");
       setAmount("");
+      setCategoryId("");
       setDate(today);
       setTime("");
       setSplitOn(false);
       setRows([]);
+      onSaved?.();
     }
-  }, [state, isEdit, today]);
+    if (state?.error) toast(state.error, "error");
+    // Solo reaccionar a un resultado nuevo de la acción.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const visibleCategories = categories.filter((c) => c.kind === kind);
   const amountNum = Number(amount) || 0;
@@ -176,41 +202,50 @@ export function TransactionForm({
       .map((r) => ({ person_id: r.personId, value: Number(r.value) || 0 })),
   );
 
+  const isExpense = kind === "expense";
+  const accentText = isExpense
+    ? "text-rose-600 dark:text-rose-400"
+    : "text-emerald-600 dark:text-emerald-400";
+
   return (
-    <form
-      ref={formRef}
-      action={formAction}
-      className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
-    >
+    <form ref={formRef} action={formAction} className="flex flex-col gap-5">
       {isEdit && <input type="hidden" name="id" value={initial!.id} />}
 
-      <div className="grid grid-cols-2 gap-2">
+      {/* Gasto / Ingreso (control segmentado) */}
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-black/[0.05] p-1 dark:bg-white/[0.07]">
         {(["expense", "income"] as const).map((k) => (
           <button
             key={k}
             type="button"
             onClick={() => {
               setKind(k);
+              // La categoría elegida es de otro tipo: se limpia.
+              setCategoryId("");
               // La división solo aplica a gastos.
               if (k === "income") setSplitOn(false);
             }}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
               kind === k
-                ? k === "expense"
-                  ? "bg-red-600 text-white"
-                  : "bg-emerald-600 text-white"
-                : "border border-black/15 dark:border-white/15"
+                ? `bg-white shadow-sm dark:bg-white/15 ${
+                    k === "expense"
+                      ? "text-rose-600 dark:text-rose-300"
+                      : "text-emerald-600 dark:text-emerald-300"
+                  }`
+                : "text-black/50 dark:text-white/50"
             }`}
           >
-            {k === "expense" ? "Gasto" : "Ingreso"}
+            {k === "expense" ? "↓ Gasto" : "↑ Ingreso"}
           </button>
         ))}
       </div>
       <input type="hidden" name="kind" value={kind} />
 
-      <div className="flex gap-2">
-        <label className="flex flex-1 flex-col gap-1 text-sm">
-          <span className="font-medium">Monto</span>
+      {/* Monto grande */}
+      <div className="flex flex-col items-center gap-2">
+        <label className="flex w-full items-baseline justify-center gap-1">
+          <span className={`text-3xl font-semibold ${accentText}`}>
+            {currencySymbol(currency)}
+          </span>
           <input
             type="number"
             name="amount"
@@ -219,119 +254,145 @@ export function TransactionForm({
             step="0.01"
             inputMode="decimal"
             placeholder="0"
+            aria-label="Monto"
+            autoFocus={!isEdit}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={inputClasses}
+            // Ancho según lo escrito: el símbolo queda pegado al número.
+            style={{ width: `${Math.min(10, Math.max(1, amount.length)) + 0.6}ch` }}
+            className={`bg-transparent text-center text-5xl font-bold tracking-tight outline-none placeholder:text-black/15 dark:placeholder:text-white/15 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none ${accentText}`}
           />
         </label>
         {effectiveCurrencies.length > 1 ? (
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">Moneda</span>
-            <select
-              name="currency"
-              defaultValue={initial?.currency ?? baseCurrency}
-              className={selectClasses}
-            >
-              {effectiveCurrencies.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : (
-          <input
-            type="hidden"
-            name="currency"
-            value={initial?.currency ?? baseCurrency}
-          />
-        )}
+          <div className="flex gap-1.5">
+            {effectiveCurrencies.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCurrency(c)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  currency === c
+                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    : chipIdle
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <input type="hidden" name="currency" value={currency} />
       </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Categoría</span>
-        <select
-          name="category_id"
-          defaultValue={initial?.category_id ?? ""}
-          className={selectClasses}
-        >
-          <option value="">Sin categoría</option>
-          {visibleCategories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {categoryIcon(c.icon)} {c.name}
-            </option>
+      {/* Categoría como chips */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-black/45 dark:text-white/45">
+          Categoría
+        </span>
+        {visibleCategories.length === 0 ? (
+          <p className="text-sm text-black/50 dark:text-white/50">
+            No tenés categorías de {isExpense ? "gasto" : "ingreso"}.{" "}
+            <Link href="/dashboard/categories" className="font-medium text-emerald-600 underline dark:text-emerald-400">
+              Crear una
+            </Link>
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {visibleCategories.map((c) => {
+              const selected = categoryId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setCategoryId(selected ? "" : c.id)}
+                  className={`${chipBase} flex items-center gap-1.5 ${
+                    selected
+                      ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30"
+                      : chipIdle
+                  }`}
+                >
+                  <span aria-hidden>{categoryIcon(c.icon)}</span>
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <input type="hidden" name="category_id" value={categoryId} />
+      </div>
+
+      <input
+        type="text"
+        name="description"
+        placeholder="Descripción (opcional) · Ej. Almuerzo"
+        aria-label="Descripción (opcional)"
+        defaultValue={initial?.description ?? ""}
+        className={fieldClasses}
+      />
+
+      {/* Fecha */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-black/45 dark:text-white/45">
+          Cuándo
+        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {[
+            { label: "Hoy", value: today },
+            { label: "Ayer", value: yesterday },
+          ].map((opt) => (
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => setDate(opt.value)}
+              className={`${chipBase} ${
+                date === opt.value
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : chipIdle
+              }`}
+            >
+              {opt.label}
+            </button>
           ))}
-        </select>
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Descripción (opcional)</span>
-        <input
-          type="text"
-          name="description"
-          placeholder="Ej. Almuerzo, pase de bus…"
-          defaultValue={initial?.description ?? ""}
-          className={inputClasses}
-        />
-      </label>
-
-      <div className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Fecha</span>
-        <div className="flex gap-2">
           <input
             type="date"
             name="occurred_on"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className={`flex-1 ${selectClasses}`}
+            aria-label="Fecha"
+            className={`${chipBase} ${
+              date !== today && date !== yesterday
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : chipIdle
+            } outline-none`}
           />
-          <button
-            type="button"
-            onClick={() => setDate(today)}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              date === today
-                ? "bg-blue-600 text-white"
-                : "border border-black/15 dark:border-white/15"
-            }`}
-          >
-            Hoy
-          </button>
-          <button
-            type="button"
-            onClick={() => setDate(yesterday)}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              date === yesterday
-                ? "bg-blue-600 text-white"
-                : "border border-black/15 dark:border-white/15"
-            }`}
-          >
-            Ayer
-          </button>
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            aria-label="Hora (opcional)"
+            title="Hora (opcional)"
+            className={`${chipBase} ${chipIdle} outline-none`}
+          />
         </div>
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          aria-label="Hora (opcional)"
-          className={`${selectClasses} w-full`}
-        />
         <input type="hidden" name="occurred_at" value={occurredAtIso} />
       </div>
 
       {/* ---- División entre personas (solo gastos) ---- */}
-      {kind === "expense" && (
-      <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
-          <label className="flex items-center gap-2 text-sm font-medium">
+      {isExpense && (
+        <div className="flex flex-col gap-3 rounded-2xl bg-black/[0.03] p-3.5 dark:bg-white/[0.04]">
+          <label className="flex items-center justify-between gap-2 text-sm font-medium">
+            <span>👥 Dividir entre personas</span>
             <input
               type="checkbox"
+              role="switch"
               checked={splitOn}
               onChange={(e) => {
                 setSplitOn(e.target.checked);
                 if (e.target.checked && rows.length === 0) addRow();
               }}
-              className="h-4 w-4 accent-emerald-600"
+              className="relative h-6 w-10 cursor-pointer appearance-none rounded-full bg-black/15 transition-colors before:absolute before:left-0.5 before:top-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:bg-emerald-600 checked:before:translate-x-4 dark:bg-white/20"
             />
-            Dividir entre personas
           </label>
 
           {splitOn && people.length === 0 && (
@@ -346,16 +407,16 @@ export function TransactionForm({
 
           {splitOn && people.length > 0 && (
             <>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1 rounded-xl bg-black/[0.05] p-1 dark:bg-white/[0.07]">
                 {(["amount", "percent"] as const).map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => setSplitMode(m)}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                       splitMode === m
-                        ? "bg-blue-600 text-white"
-                        : "border border-black/15 dark:border-white/15"
+                        ? "bg-white shadow-sm dark:bg-white/15"
+                        : "text-black/50 dark:text-white/50"
                     }`}
                   >
                     {m === "amount" ? "Por monto" : "Por %"}
@@ -369,15 +430,11 @@ export function TransactionForm({
                     ? round2((amountNum * (Number(row.value) || 0)) / 100)
                     : Number(row.value) || 0;
                 return (
-                  <div
-                    key={row.id}
-                    className="flex flex-col gap-2 rounded-lg border border-black/10 p-2.5 dark:border-white/10"
-                  >
-                    {/* Persona: a todo el ancho para que se lea completo */}
+                  <div key={row.id} className="flex items-center gap-2">
                     <select
                       value={row.personId}
                       onChange={(e) => setRow(row.id, { personId: e.target.value })}
-                      className={`w-full ${selectClasses} py-2`}
+                      className={`min-w-0 flex-1 ${fieldClasses} py-2.5`}
                     >
                       {people.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -385,62 +442,57 @@ export function TransactionForm({
                         </option>
                       ))}
                     </select>
-                    {/* Monto/%, equivalente y quitar */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-28 flex-col">
                       <input
                         type="number"
                         min="0"
                         step="0.01"
                         inputMode="decimal"
-                        placeholder={splitMode === "percent" ? "%" : "₡"}
+                        placeholder={splitMode === "percent" ? "%" : currencySymbol(currency)}
                         value={row.value}
                         onChange={(e) => setRow(row.id, { value: e.target.value })}
-                        className={`w-28 ${inputClasses} py-2`}
+                        className={`${fieldClasses} py-2.5`}
                       />
-                      <span className="flex-1 text-xs text-black/50 dark:text-white/50">
-                        {splitMode === "percent" ? `= ${formatMoney(resolved)}` : ""}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeRow(row.id)}
-                        aria-label="Quitar persona"
-                        title="Quitar"
-                        className="rounded-md px-2 py-1 text-black/40 hover:bg-red-500/10 hover:text-red-600 dark:text-white/40 dark:hover:text-red-400"
-                      >
-                        ✕
-                      </button>
+                      {splitMode === "percent" && (
+                        <span className="mt-0.5 text-[11px] text-black/45 dark:text-white/45">
+                          = {formatMoney(resolved, currency)}
+                        </span>
+                      )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => removeRow(row.id)}
+                      aria-label="Quitar persona"
+                      title="Quitar"
+                      className="rounded-full p-2 text-black/40 hover:bg-red-500/10 hover:text-red-600 dark:text-white/40 dark:hover:text-red-400"
+                    >
+                      ✕
+                    </button>
                   </div>
                 );
               })}
 
               <div className="flex items-center justify-between gap-2 text-sm">
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={addRow}
-                    className="rounded-lg border border-black/15 px-3 py-1.5 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-                  >
+                  <button type="button" onClick={addRow} className={`${chipBase} ${chipIdle} py-1.5`}>
                     + Persona
                   </button>
-                  <button
-                    type="button"
-                    onClick={splitEqually}
-                    className="rounded-lg border border-black/15 px-3 py-1.5 text-sm transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
-                  >
+                  <button type="button" onClick={splitEqually} className={`${chipBase} ${chipIdle} py-1.5`}>
                     Repartir igual
                   </button>
                 </div>
                 <span
-                  className={
+                  className={`text-xs font-medium ${
                     Math.abs(remaining) < 0.5
                       ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400"
-                  }
+                      : "text-rose-600 dark:text-rose-400"
+                  }`}
                 >
-                  {splitMode === "percent"
-                    ? `Falta ${remaining}%`
-                    : `Falta ${formatMoney(remaining)}`}
+                  {Math.abs(remaining) < 0.5
+                    ? "✓ Cuadra"
+                    : splitMode === "percent"
+                      ? `Falta ${remaining}%`
+                      : `Falta ${formatMoney(remaining, currency)}`}
                 </span>
               </div>
 
@@ -456,19 +508,16 @@ export function TransactionForm({
       )}
 
       {state?.error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
-      )}
-      {state?.ok && !isEdit && (
-        <p className="text-sm text-emerald-600 dark:text-emerald-400">
-          ¡Movimiento guardado!
+        <p className="rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+          {state.error}
         </p>
       )}
 
-      <div className="mt-1 flex gap-2">
+      <div className="flex gap-2">
         {isEdit && (
           <Link
             href="/dashboard"
-            className="flex-1 rounded-lg border border-black/15 px-4 py-2.5 text-center font-medium transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+            className="flex-1 rounded-2xl border border-black/10 px-4 py-3.5 text-center font-semibold dark:border-white/15"
           >
             Cancelar
           </Link>
@@ -477,11 +526,19 @@ export function TransactionForm({
           type="submit"
           disabled={
             pending ||
-            (kind === "expense" && splitOn && people.length > 0 && !splitValid)
+            (isExpense && splitOn && people.length > 0 && !splitValid)
           }
-          className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+          className={`flex-1 rounded-2xl px-4 py-3.5 font-semibold text-white shadow-lg transition-colors disabled:opacity-50 ${
+            isExpense
+              ? "bg-rose-600 shadow-rose-600/25 hover:bg-rose-700"
+              : "bg-emerald-600 shadow-emerald-600/25 hover:bg-emerald-700"
+          }`}
         >
-          {pending ? "Guardando…" : isEdit ? "Guardar cambios" : "Agregar"}
+          {pending
+            ? "Guardando…"
+            : isEdit
+              ? "Guardar"
+              : `Agregar ${isExpense ? "gasto" : "ingreso"}${amountNum > 0 ? ` de ${formatMoney(amountNum, currency)}` : ""}`}
         </button>
       </div>
     </form>

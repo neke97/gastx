@@ -5,6 +5,37 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-10-29 — Rediseño visual y de UX (rama `develop`)
+
+**Hecho:**
+- **Base visual:** ahora sí se usa la fuente Geist (`globals.css` forzaba Arial), fondo
+  gris-verdoso suave con tarjetas blancas (`@utility card`), cifras tabulares, efecto de
+  "hundirse" al tocar, modo oscuro revisado.
+- **Montos sin ",00"** cuando no hay céntimos (`formatMoney`).
+- **Inicio:** saludo según la hora con el nombre (`display_name`), tarjeta de balance con
+  degradado y selector de período segmentado ("Ver otro mes o año" plegable), atajos en
+  carrusel horizontal, movimientos **agrupados por día** (Hoy/Ayer/fecha) con neto diario,
+  toda la fila abre la edición.
+- **Agregar movimiento:** botón flotante "+" que abre una hoja inferior
+  (`AddTransactionSheet`, montada con portal). Formulario rediseñado: monto grande,
+  categorías como chips con emoji, chips Hoy/Ayer, switch para dividir, botón
+  "Agregar gasto de ₡3 500". Al guardar: aviso flotante + vibración corta y se cierra.
+- **Avisos** (`Toaster` / `toast()`) y `SubmitButton doneToast` (ej. "Salario registrado").
+- **Borrar en dos toques** (`ConfirmSubmitButton`): movimientos (desde la edición),
+  recurrentes y planes de cuotas. Ya no se borra por un toque accidental.
+- **Navegación:** íconos de línea propios (sin emojis) con indicador activo; `PageHeader`
+  uniforme (flecha redonda de volver en subpantallas); esqueleto de carga.
+- **Recurrentes / Cuotas:** la lista va primero; el formulario de crear queda en un
+  "+ Nuevo…" plegable. Tarjetas con acciones claras (Registrar hoy, pausar, editar, borrar)
+  y en cuotas "Falta ₡…" + porcentaje.
+- **Más:** tarjeta de perfil y menú con descripciones. **Portada** y **login** rediseñados.
+
+**Cómo se verificó:** un Supabase falso local con datos de ejemplo (fuera del repo) +
+capturas en tamaño celular (claro y oscuro) de todas las pantallas, y una prueba del flujo
+agregar → aviso → hoja cerrada y del borrado en dos toques.
+
+---
+
 ## 2026-10-29 — App gratis por ahora, sesión persistente, botón "Descargar la app" y auto-actualización
 
 Rama: `develop`.

@@ -40,7 +40,7 @@ export function GroupExpenseForm({
     <form
       ref={formRef}
       action={action}
-      className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]"
+      className="flex flex-col gap-3 card p-4"
     >
       <input type="hidden" name="group_id" value={groupId} />
 

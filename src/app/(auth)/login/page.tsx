@@ -12,12 +12,12 @@ export default async function LoginPage({
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-700 text-3xl font-bold text-white shadow-lg">
+          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-700 text-3xl font-bold text-white shadow-xl shadow-emerald-700/30">
             ₡
           </div>
           <h1 className="text-2xl font-bold tracking-tight">GastX</h1>
           <p className="text-sm text-black/60 dark:text-white/60">
-            Ingresá para registrar tus gastos e ingresos.
+            ¡Qué bueno verte! Ingresá para seguir.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export default async function LoginPage({
           </p>
         )}
 
-        <form className="flex flex-col gap-4">
+        <form className="card flex flex-col gap-4 p-5">
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Correo</span>
             <input
@@ -41,7 +41,7 @@ export default async function LoginPage({
               required
               autoComplete="email"
               placeholder="vos@ejemplo.com"
-              className="rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15"
+              className="rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] outline-none transition-colors focus:border-emerald-500 focus:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:focus:bg-white/[0.08]"
             />
           </label>
 
@@ -54,19 +54,19 @@ export default async function LoginPage({
               minLength={6}
               autoComplete="current-password"
               placeholder="••••••••"
-              className="rounded-lg border border-black/15 bg-transparent px-3 py-2.5 outline-none focus:border-emerald-500 dark:border-white/15"
+              className="rounded-xl border border-black/10 bg-black/[0.03] px-3.5 py-3 text-[15px] outline-none transition-colors focus:border-emerald-500 focus:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:focus:bg-white/[0.08]"
             />
           </label>
 
           <button
             formAction={signIn}
-            className="mt-2 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700"
+            className="mt-2 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700"
           >
             Iniciar sesión
           </button>
           <button
             formAction={signUp}
-            className="rounded-lg border border-black/15 px-4 py-2.5 font-medium transition-colors hover:bg-black/[0.04] dark:border-white/15 dark:hover:bg-white/[0.06]"
+            className="rounded-2xl px-4 py-3 font-semibold text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
           >
             Crear cuenta
           </button>
