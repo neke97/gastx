@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
@@ -153,10 +154,10 @@ export function CategoryForm({ initial }: { initial?: Initial }) {
         <button
           type="submit"
           disabled={pending}
+        aria-busy={pending}
           className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
         >
-          {pending
-            ? "Guardando…"
+          {pending ? <Busy label="Guardando…" />
             : isEdit
               ? "Guardar cambios"
               : "Agregar categoría"}

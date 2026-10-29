@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState, useEffect } from "react";
 import {
   generatePending,
@@ -31,11 +32,12 @@ export function GeneratePendingButton() {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         title="Generar los movimientos automáticos pendientes"
         className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/25 disabled:opacity-60 dark:text-emerald-400"
       >
         <Icon name="sparkles" size={15} />
-        {pending ? "Generando…" : "Generar"}
+        {pending ? <Busy label="Generando…" /> : "Generar"}
       </button>
     </form>
   );

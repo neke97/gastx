@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState } from "react";
 import { redeemCode, type PromoState } from "@/app/subscribe/actions";
 
@@ -31,9 +32,10 @@ export function PromoCodeForm() {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
       >
-        {pending ? "Validando…" : "Activar acceso"}
+        {pending ? <Busy label="Validando…" /> : "Activar acceso"}
       </button>
     </form>
   );

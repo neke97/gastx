@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState } from "react";
 import { createGroup, type GroupFormState } from "@/app/(app)/dashboard/groups/actions";
 
@@ -21,9 +22,10 @@ export function CreateGroupForm() {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
       >
-        {pending ? "Creando…" : "Crear"}
+        {pending ? <Busy label="Creando…" /> : "Crear"}
       </button>
       {state?.error && (
         <p className="w-full text-sm text-red-600 dark:text-red-400">

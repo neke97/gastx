@@ -43,12 +43,12 @@ export function Toaster() {
   return (
     <div
       key={current.id}
-      role="status"
+      role="alert"
       aria-live="polite"
       className={`toast-in fixed left-1/2 z-[60] flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-white shadow-lg ${
         current.tone === "success" ? "bg-neutral-900 dark:bg-neutral-800" : "bg-red-600"
       }`}
-      style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+      style={{ top: "calc(env(safe-area-inset-top) + 50px)" }}
     >
       <span
         className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +54,10 @@ export default function RootLayout({
           }}
         />
         {children}
+        {/* Suspense: useSearchParams no debe frenar el render estático de las páginas. */}
+        <Suspense fallback={null}>
+          <LoadingIndicator />
+        </Suspense>
         <ServiceWorkerRegister />
       </body>
     </html>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { addPlan, type PlanFormState } from "@/app/(app)/dashboard/installments/actions";
 import { formatMoney } from "@/lib/format";
@@ -184,9 +185,10 @@ export function InstallmentForm({
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="mt-1 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700 disabled:opacity-50"
       >
-        {pending ? "Creando…" : "Crear plan de cuotas"}
+        {pending ? <Busy label="Creando…" /> : "Crear plan de cuotas"}
       </button>
     </form>
   );

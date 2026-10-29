@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { Busy } from "@/components/Spinner";
 
 /**
  * Botón de borrar en dos toques: el primero pide confirmación ("¿Borrar?") y
@@ -34,6 +35,7 @@ export function ConfirmSubmitButton({
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending}
       aria-label={armed ? "Confirmar borrado" : ariaLabel}
       onClick={(e) => {
         if (!armed) {
@@ -46,7 +48,7 @@ export function ConfirmSubmitButton({
       }}
       className={armed ? confirmClassName : className}
     >
-      {pending ? "Borrando…" : armed ? confirmLabel : children}
+      {pending ? <Busy label="Borrando…" /> : armed ? confirmLabel : children}
     </button>
   );
 }

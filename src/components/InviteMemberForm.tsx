@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState, useEffect, useRef } from "react";
 import { inviteToGroup, type GroupFormState } from "@/app/(app)/dashboard/groups/actions";
 
@@ -28,9 +29,10 @@ export function InviteMemberForm({ groupId }: { groupId: string }) {
         <button
           type="submit"
           disabled={pending}
+        aria-busy={pending}
           className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
         >
-          {pending ? "Invitando…" : "Invitar"}
+          {pending ? <Busy label="Invitando…" /> : "Invitar"}
         </button>
       </div>
       {state?.error && (

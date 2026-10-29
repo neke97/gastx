@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import { useActionState, useEffect, useRef } from "react";
 import {
   addGroupExpense,
@@ -95,9 +96,10 @@ export function GroupExpenseForm({
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
       >
-        {pending ? "Agregando…" : "Agregar gasto del grupo"}
+        {pending ? <Busy label="Agregando…" /> : "Agregar gasto del grupo"}
       </button>
     </form>
   );

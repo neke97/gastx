@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "@/components/Toaster";
+import { Busy, Spinner } from "@/components/Spinner";
 
 /**
  * Botón de submit que muestra estado de carga usando useFormStatus.
@@ -42,7 +43,16 @@ export function SubmitButton({
       aria-label={ariaLabel}
       className={`${className} ${pending ? "opacity-60" : ""}`}
     >
-      {pending ? (pendingLabel ?? "…") : children}
+      {pending ? (
+        // Botones de ícono ("…" o sin texto): solo la ruedita.
+        pendingLabel == null || pendingLabel === "…" ? (
+          <Spinner className="mx-auto" />
+        ) : (
+          <Busy label={pendingLabel} />
+        )
+      ) : (
+        children
+      )}
     </button>
   );
 }

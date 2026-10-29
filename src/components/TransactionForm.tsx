@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
@@ -524,6 +525,7 @@ export function TransactionForm({
         )}
         <button
           type="submit"
+          aria-busy={pending}
           disabled={
             pending ||
             (isExpense && splitOn && people.length > 0 && !splitValid)
@@ -534,8 +536,7 @@ export function TransactionForm({
               : "bg-emerald-600 shadow-emerald-600/25 hover:bg-emerald-700"
           }`}
         >
-          {pending
-            ? "Guardando…"
+          {pending ? <Busy label="Guardando…" />
             : isEdit
               ? "Guardar"
               : `Agregar ${isExpense ? "gasto" : "ingreso"}${amountNum > 0 ? ` de ${formatMoney(amountNum, currency)}` : ""}`}

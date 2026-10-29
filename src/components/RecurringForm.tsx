@@ -1,5 +1,6 @@
 "use client";
 
+import { Busy } from "@/components/Spinner";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
@@ -259,9 +260,10 @@ export function RecurringForm({
         <button
           type="submit"
           disabled={pending}
+        aria-busy={pending}
           className="flex-1 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700 disabled:opacity-50"
         >
-          {pending ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear recurrente"}
+          {pending ? <Busy label="Guardando…" /> : isEdit ? "Guardar cambios" : "Crear recurrente"}
         </button>
       </div>
     </form>

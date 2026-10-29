@@ -113,6 +113,18 @@ a:active {
     transform: translate(-50%, 0) scale(1);
   }
 }
+/* Barrita de carga que recorre la parte superior de la pantalla. */
+@keyframes loadingBar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+.loading-bar {
+  animation: loadingBar 1s ease-in-out infinite;
+}
 .sheet-up {
   animation: sheetUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
