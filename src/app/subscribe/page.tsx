@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { hasAccess, ACCESS_COLUMNS } from "@/lib/access";
+import { hasAccess, ACCESS_COLUMNS, PAYWALL_ENABLED } from "@/lib/access";
 import { PromoCodeForm } from "@/components/PromoCodeForm";
 import { PayPalSubscribeButtons } from "@/components/PayPalSubscribeButtons";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -14,6 +14,9 @@ const PLAN_FEATURES = [
 ];
 
 export default async function SubscribePage() {
+  // Cobro apagado: no hay nada que pagar.
+  if (!PAYWALL_ENABLED) redirect("/dashboard");
+
   const supabase = await createClient();
   const {
     data: { user },

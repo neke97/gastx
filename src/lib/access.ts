@@ -7,6 +7,13 @@
  *   hacia adelante; al cancelar, el acceso dura hasta esa fecha y luego expira).
  */
 
+/**
+ * Interruptor del cobro. Mientras esté apagado la app es gratis para todos:
+ * no hay gate de acceso, /subscribe redirige al dashboard y Ajustes no muestra
+ * la suscripción. Para volver a cobrar: variable `PAYWALL_ENABLED=true` en Vercel.
+ */
+export const PAYWALL_ENABLED = process.env.PAYWALL_ENABLED === "true";
+
 export type AccessProfile = {
   access_active: boolean | null;
   current_period_end: string | null;

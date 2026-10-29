@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { COMMON_CURRENCIES } from "@/lib/currency";
 import { formatDate } from "@/lib/format";
 import { PLANS, type PlanInterval } from "@/lib/plans";
+import { PAYWALL_ENABLED } from "@/lib/access";
 import {
   updateBaseCurrency,
   upsertRate,
@@ -54,7 +55,7 @@ export default async function SettingsPage() {
   const subStatus = profile?.subscription_status as string | null;
   const planInterval = profile?.plan_interval as PlanInterval | null;
   const periodEnd = profile?.current_period_end as string | null;
-  const isSubscriber = plan === "pro" && Boolean(subStatus);
+  const isSubscriber = PAYWALL_ENABLED && plan === "pro" && Boolean(subStatus);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 py-8">

@@ -11,7 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "GastX",
     description:
       "Registrá tus gastos e ingresos, dividí gastos, controlá cuotas y mirá reportes.",
-    start_url: "/",
+    id: "/",
+    // Abre directo en el dashboard (si no hay sesión, el layout manda a /login).
+    start_url: "/dashboard",
     display: "standalone",
     background_color: "#0b0f0e",
     theme_color: "#059669",

@@ -43,6 +43,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Guarda el evento de instalación aunque llegue antes de que React
+            monte el botón "Descargar la app". */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__gastxInstallPrompt=e;});",
+          }}
+        />
         {children}
         <ServiceWorkerRegister />
       </body>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 const LINKS = [
   { href: "/dashboard/categories", label: "Categorías", icon: "🏷️" },
@@ -39,6 +40,8 @@ export default async function MorePage() {
           </li>
         ))}
       </ul>
+
+      <InstallAppButton />
 
       <form action={signOut}>
         <SubmitButton

@@ -1,4 +1,5 @@
 import { signIn, signUp } from "./actions";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 export default async function LoginPage({
   searchParams,
@@ -70,6 +71,8 @@ export default async function LoginPage({
             Crear cuenta
           </button>
         </form>
+
+        <InstallAppButton className="mt-6" />
       </div>
     </main>
   );

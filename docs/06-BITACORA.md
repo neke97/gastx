@@ -5,6 +5,38 @@ Formato: fecha, qué se hizo, decisiones y qué sigue.
 
 ---
 
+## 2026-10-29 — App gratis por ahora, sesión persistente, botón "Descargar la app" y auto-actualización
+
+Rama: `develop`.
+
+**Hecho:**
+- **Cobro apagado** con interruptor `PAYWALL_ENABLED` (`src/lib/access.ts`). Apagado
+  (default): sin gate en `(app)/layout.tsx`, `/subscribe` redirige al dashboard y Ajustes
+  no muestra "Mi suscripción". Todo el código PayPal/promo queda intacto. Para volver a
+  cobrar: variable `PAYWALL_ENABLED=true` en Vercel y redeploy.
+- **Sesión que no se pierde** (el pendiente opcional del 2026-07-16): se reintrodujo
+  `src/proxy.ts`, ahora en **runtime Node.js** (verificado en
+  `.next/server/functions-config-manifest.json`; el manifest de Edge queda vacío).
+  Refresca la sesión con `getClaims()` y escribe las cookies (duran 400 días). Sin esto,
+  el token renovado nunca llegaba al navegador y la sesión se revocaba. Con sesión,
+  `/` y `/login` van directo a `/dashboard`. Envuelto en try/catch: si falla, deja pasar.
+- **Botón "Descargar la app"** (`InstallAppButton`) en portada, login y Más. En
+  Android/Chrome abre el diálogo nativo (`beforeinstallprompt`, capturado por un script
+  inline en el layout raíz); en iPhone muestra cómo "Agregar a inicio"; oculto si ya se
+  usa la app instalada.
+- **Auto-actualización:** `NEXT_PUBLIC_APP_VERSION` (commit de Vercel) se inyecta en el
+  build; `/api/version` devuelve la versión desplegada. `ServiceWorkerRegister` la compara
+  al abrir/volver a la app y recarga si hay una nueva. El SW se registra como
+  `/sw.js?v=<versión>` y usa cache por versión (borra la anterior); ya no cachea `/api/*`
+  ni redirecciones.
+- Manifest: `start_url` = `/dashboard`.
+
+**Pendiente para el usuario:**
+- Probar en el **preview de Vercel de `develop`** antes de mergear a `main` (por el
+  antecedente del Proxy): iniciar sesión, cerrar la app, volver a abrirla.
+
+---
+
 ## 2026-07-17 — División solo en gastos + balance general con período
 
 **Hecho:**

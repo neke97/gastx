@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { hasAccess, ACCESS_COLUMNS } from "@/lib/access";
+import { hasAccess, ACCESS_COLUMNS, PAYWALL_ENABLED } from "@/lib/access";
 import { BottomNav } from "@/components/BottomNav";
 
 export default async function AppLayout({
@@ -15,12 +15,14 @@ export default async function AppLayout({
   if (!user) redirect("/login");
 
   // Gate de acceso: sin suscripción / código activo, mandar a /subscribe.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(ACCESS_COLUMNS)
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!hasAccess(profile)) redirect("/subscribe");
+  if (PAYWALL_ENABLED) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select(ACCESS_COLUMNS)
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!hasAccess(profile)) redirect("/subscribe");
+  }
 
   return (
     <>

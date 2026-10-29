@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
+// Versión de este build: cambia en cada deploy de Vercel (commit) y la app
+// instalada la compara con /api/version para actualizarse sola.
+const APP_VERSION =
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? `dev-${Date.now()}`;
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: APP_VERSION,
+  },
   async headers() {
     return [
       {
